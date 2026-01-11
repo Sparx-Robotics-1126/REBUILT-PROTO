@@ -41,10 +41,9 @@ import org.team1126.robot.Constants.LowerCAN;
 import org.team1126.robot.Constants.RioCAN;
 import org.team1126.robot.util.Field;
 import org.team1126.robot.util.Field.ReefLocation;
-
 // import org.team1126.robot.util.Vision;
 
-// import org.team1126.robot.util.Vision;
+import org.team1126.robot.util.Vision;
 
 /**
  * The robot's swerve drivetrain.
@@ -145,7 +144,7 @@ public final class Swerve extends GRRSubsystem {
     private final SwerveState state;
 
     private final SwerveAPI api;
-    // private final Vision vision;
+    private final Vision vision;
     private final PAPFController apf;
     private final ProfiledPIDController angularPID;
 
@@ -159,7 +158,7 @@ public final class Swerve extends GRRSubsystem {
 
     public Swerve() {
         api = new SwerveAPI(config);
-        // vision = new Vision(Constants.CAMERAS);
+        vision = new Vision(Constants.CAMERAS);
         apf = new PAPFController(6.0, 0.25, 0.01, true, Field.obstacles);
         angularPID = new ProfiledPIDController(8.0, 0.0, 0.0, new Constraints(10.0, 26.0));
         angularPID.enableContinuousInput(-Math.PI, Math.PI);
@@ -177,10 +176,10 @@ public final class Swerve extends GRRSubsystem {
         api.refresh();
 
         // Apply vision estimates to the pose estimator.
-        // var measurements = vision.getUnreadResults(state.poseHistory, state.odometryPose, state.velocity);
-        // SmartDashboard.putNumber("Vision X", measurements.length);
-        // seesAprilTag = measurements.length > 0;
-        // api.addVisionMeasurements(measurements);
+        var measurements = vision.getUnreadResults(state.poseHistory, state.odometryPose, state.velocity);
+        SmartDashboard.putNumber("Vision X", measurements.length);
+        seesAprilTag = measurements.length > 0;
+        api.addVisionMeasurements(measurements);
 
         // Calculate helpers
         Translation2d reefCenter = Field.reef.get();
