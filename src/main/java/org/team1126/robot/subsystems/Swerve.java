@@ -91,28 +91,28 @@ public final class Swerve extends GRRSubsystem {
         .setLocation(OFFSET, OFFSET)
         .setMoveMotor(SwerveMotors.talonFX(LowerCAN.FL_MOVE, true))
         .setTurnMotor(SwerveMotors.talonFX(LowerCAN.FL_TURN, false))
-        .setEncoder(SwerveEncoders.cancoder(LowerCAN.FL_ENCODER, 0.357, false));
+        .setEncoder(SwerveEncoders.cancoder(LowerCAN.FL_ENCODER, .164, false));
 
     private final SwerveModuleConfig frontRight = new SwerveModuleConfig()
         .setName("frontRight")
         .setLocation(OFFSET, -OFFSET)
         .setMoveMotor(SwerveMotors.talonFX(LowerCAN.FR_MOVE, true))
         .setTurnMotor(SwerveMotors.talonFX(LowerCAN.FR_TURN, false))
-        .setEncoder(SwerveEncoders.cancoder(LowerCAN.FR_ENCODER, 0.454, false));
+        .setEncoder(SwerveEncoders.cancoder(LowerCAN.FR_ENCODER, 0.498, false));
 
     private final SwerveModuleConfig backLeft = new SwerveModuleConfig()
         .setName("backLeft")
         .setLocation(-OFFSET, OFFSET)
-        .setMoveMotor(SwerveMotors.talonFX(LowerCAN.BL_MOVE, false))
+        .setMoveMotor(SwerveMotors.talonFX(LowerCAN.BL_MOVE, true))
         .setTurnMotor(SwerveMotors.talonFX(LowerCAN.BL_TURN, false))
-        .setEncoder(SwerveEncoders.cancoder(LowerCAN.BL_ENCODER, 0.009, false));
+        .setEncoder(SwerveEncoders.cancoder(LowerCAN.BL_ENCODER, -.510, false));
 
     private final SwerveModuleConfig backRight = new SwerveModuleConfig()
         .setName("backRight")
         .setLocation(-OFFSET, -OFFSET)
         .setMoveMotor(SwerveMotors.talonFX(LowerCAN.BR_MOVE, true))
         .setTurnMotor(SwerveMotors.talonFX(LowerCAN.BR_TURN, false))
-        .setEncoder(SwerveEncoders.cancoder(LowerCAN.BR_ENCODER, -0.382, false));
+        .setEncoder(SwerveEncoders.cancoder(LowerCAN.BR_ENCODER, 0.347, false));
 
     private final SwerveConfig config = new SwerveConfig()
         .setTimings(LoggedRobot.DEFAULT_PERIOD, 0.004, 0.02, 0.02)

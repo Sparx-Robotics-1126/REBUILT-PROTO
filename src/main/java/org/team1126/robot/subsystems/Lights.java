@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.ArrayList;
 import java.util.List;
@@ -460,7 +461,9 @@ public final class Lights {
 
                         double view = Math.toRadians(1.0);
                         double percent = (center.calculate(radians) + (view / 2.0) - radians) / view;
+                        SmartDashboard.putNumber("Lights.Top.preMatch/percent", percent);
                         int closestLED = (int) Math.round(percent * (LENGTH - 1));
+                        SmartDashboard.putNumber("Lights.Top.preMatch/closestLED", closestLED);
                         Color alliance = Alliance.isBlue() ? Color.BLUE : Color.RED;
                         for (int i = 0; i < LENGTH; i++) {
                             if (Math.abs(closestLED - i) <= 1) {
