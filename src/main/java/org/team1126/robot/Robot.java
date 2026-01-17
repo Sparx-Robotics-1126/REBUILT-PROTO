@@ -21,6 +21,7 @@ import org.team1126.robot.commands.Routines;
 import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Swerve;
 import org.team1126.robot.util.ReefSelection;
+import org.team1126.robot.subsystems.CookieFinder;
 
 @Logged
 public final class Robot extends LoggedRobot {
@@ -28,7 +29,9 @@ public final class Robot extends LoggedRobot {
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
 
     public final Lights lights;
-    public final Swerve swerve;
+    // public final Swerve swerve;
+    // 
+    public final CookieFinder cookieFinder;
 
     public final ReefSelection selection;
 
@@ -43,7 +46,8 @@ public final class Robot extends LoggedRobot {
 
         // Initialize subsystems
         lights = new Lights();
-        swerve = new Swerve();
+        // swerve = new Swerve();
+        cookieFinder = new CookieFinder();
 
         // Initialize helpers
         selection = new ReefSelection();
@@ -57,24 +61,24 @@ public final class Robot extends LoggedRobot {
         coDriver = new CommandXboxController(Constants.CO_DRIVER);
 
         // Set default commands
-        swerve.setDefaultCommand(swerve.drive(this::driverX, this::driverY, this::driverAngular));
+        // swerve.setDefaultCommand(swerve.drive(this::driverX, this::driverY, this::driverAngular));
 
         // Create triggers
         Trigger allowGoosing = coDriver.a().negate();
-        Trigger changedReference = RobotModeTriggers.teleop().and(swerve::changedReference);
+        // Trigger changedReference = RobotModeTriggers.teleop().and(swerve::changedReference);
         Trigger poo = (driver.leftBumper().or(driver.rightBumper()).negate()).and(selection::isL1);
 
         // Driver bindings
         driver.axisLessThan(kRightY.value, -0.5).onTrue(selection.incrementLevel());
         driver.axisGreaterThan(kRightY.value, 0.5).onTrue(selection.decrementLevel());
-        driver.leftTrigger().onTrue(swerve.tareRotation());
+        // driver.leftTrigger().onTrue(swerve.tareRotation());
 
         // driver.povLeft().onTrue(swerve.tareRotation());
         // driver.povRight().whileTrue(swerve.apfDrive(selection::isLeft, () -> true, selection::isL4));
-        driver.povLeft().whileTrue(swerve.apfDrive(selection::isLeft, () -> true, selection::isL4));
-        driver.leftStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
+        // driver.povLeft().whileTrue(swerve.apfDrive(selection::isLeft, () -> true, selection::isL4));
+        // driver.leftStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
 
-        changedReference.onTrue(new RumbleCommand(driver, 1.0).withTimeout(0.2));
+        // changedReference.onTrue(new RumbleCommand(driver, 1.0).withTimeout(0.2));
 
         // Co-driver bindings
         coDriver.a().onTrue(none()); // Reserved (No goosing around)
