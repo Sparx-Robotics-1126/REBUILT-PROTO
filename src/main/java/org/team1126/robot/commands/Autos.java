@@ -3,15 +3,12 @@ package org.team1126.robot.commands;
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 import static org.team1126.robot.util.Field.ReefLocation.*;
 
-import edu.wpi.first.wpilibj2.command.Command;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.command.AutoChooser;
 import org.team1126.robot.Robot;
 import org.team1126.robot.subsystems.Lights;
-import org.team1126.robot.subsystems.Swerve;
-import org.team1126.robot.util.Field;
 import org.team1126.robot.util.ReefSelection;
 
 /**
@@ -31,7 +28,7 @@ public final class Autos {
     private final Robot robot;
 
     private final Lights lights;
-    private final Swerve swerve;
+    // private final Swerve swerve;
 
     private final Routines routines;
     private final ReefSelection selection;
@@ -42,7 +39,7 @@ public final class Autos {
         this.robot = robot;
 
         lights = robot.lights;
-        swerve = robot.swerve;
+        //swerve = robot.swerve;
 
         selection = robot.selection;
         routines = robot.routines;
@@ -58,9 +55,9 @@ public final class Autos {
         return chooser.defaultSelected().getAsBoolean();
     }
 
-    private Command avoid(boolean left) {
-        return swerve.apfDrive(() -> Field.avoid.get(left), avoidDecel::get, avoidTol::get);
-    }
+    // private Command avoid(boolean left) {
+    //     return swerve.apfDrive(() -> Field.avoid.get(left), avoidDecel::get, avoidTol::get);
+    // }
 
     // ********** Sim / Testing **********
 }

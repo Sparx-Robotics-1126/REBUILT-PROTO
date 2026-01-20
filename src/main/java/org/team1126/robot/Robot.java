@@ -14,14 +14,12 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.logging.Profiler;
 import org.team1126.lib.util.DisableWatchdog;
-import org.team1126.lib.util.command.RumbleCommand;
 import org.team1126.lib.util.vendors.PhoenixUtil;
 import org.team1126.robot.commands.Autos;
 import org.team1126.robot.commands.Routines;
-import org.team1126.robot.subsystems.Lights;
-import org.team1126.robot.subsystems.Swerve;
-import org.team1126.robot.util.ReefSelection;
 import org.team1126.robot.subsystems.CookieFinder;
+import org.team1126.robot.subsystems.Lights;
+import org.team1126.robot.util.ReefSelection;
 
 @Logged
 public final class Robot extends LoggedRobot {
@@ -30,7 +28,7 @@ public final class Robot extends LoggedRobot {
 
     public final Lights lights;
     // public final Swerve swerve;
-    // 
+    //
     public final CookieFinder cookieFinder;
 
     public final ReefSelection selection;
@@ -87,7 +85,7 @@ public final class Robot extends LoggedRobot {
         coDriver.povDown().onTrue(selection.decrementLevel());
 
         // Setup lights
-        routines.lightsPreMatch(autos::defaultSelected).schedule();
+        // routines.lightsPreMatch(autos::defaultSelected).schedule();
 
         RobotModeTriggers.autonomous().whileTrue(lights.sides.flames(false));
 
