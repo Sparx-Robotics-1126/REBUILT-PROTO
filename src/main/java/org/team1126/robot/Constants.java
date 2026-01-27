@@ -32,6 +32,11 @@ public final class Constants {
             "right",
             new Translation3d(.368, -.05, Units.inchesToMeters(8.5)),
             new Rotation3d(0.0, Math.toRadians(0.0), Math.toRadians(-45.0))
+        ),
+        new CameraConfig(
+            "objectDetection", 
+            null, 
+            null
         )
     };
 
