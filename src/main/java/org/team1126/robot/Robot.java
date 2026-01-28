@@ -19,6 +19,7 @@ import org.team1126.robot.commands.Autos;
 import org.team1126.robot.commands.Routines;
 import org.team1126.robot.subsystems.CookieFinder;
 import org.team1126.robot.subsystems.Lights;
+import org.team1126.robot.subsystems.MotorSubsystem;
 import org.team1126.robot.util.ReefSelection;
 
 @Logged
@@ -30,6 +31,8 @@ public final class Robot extends LoggedRobot {
     // public final Swerve swerve;
     //
     public final CookieFinder cookieFinder;
+
+    public final MotorSubsystem motorSub;
 
     public final ReefSelection selection;
 
@@ -46,6 +49,8 @@ public final class Robot extends LoggedRobot {
         lights = new Lights();
         // swerve = new Swerve();
         cookieFinder = new CookieFinder();
+
+        motorSub = new MotorSubsystem();
 
         // Initialize helpers
         selection = new ReefSelection();
