@@ -9,32 +9,29 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.logging.Profiler;
 import org.team1126.lib.util.DisableWatchdog;
 import org.team1126.lib.util.vendors.PhoenixUtil;
-import org.team1126.robot.commands.Autos;
-import org.team1126.robot.commands.Routines;
-import org.team1126.robot.subsystems.CookieFinder;
-import org.team1126.robot.subsystems.Lights;
-import org.team1126.robot.util.ReefSelection;
+import org.team1126.robot.subsystems.ObjectDetection;
 
 @Logged
 public final class Robot extends LoggedRobot {
 
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
 
-    public final Lights lights;
+    // public final Lights lights;
     // public final Swerve swerve;
     //
-    public final CookieFinder cookieFinder;
 
-    public final ReefSelection selection;
+    public final ObjectDetection objectDetection;
 
-    public final Routines routines;
-    public final Autos autos;
+    // public final CookieFinder cookieFinder;
+
+    // public final ReefSelection selection;
+
+    // public final Routines routines;
+    // public final Autos autos;
 
     private final CommandXboxController driver;
     private final CommandXboxController coDriver;
@@ -43,16 +40,18 @@ public final class Robot extends LoggedRobot {
         PhoenixUtil.disableDaemons();
 
         // Initialize subsystems
-        lights = new Lights();
+        // lights = new Lights();
         // swerve = new Swerve();
-        cookieFinder = new CookieFinder();
+        // cookieFinder = new CookieFinder();
+
+        objectDetection = new ObjectDetection();
 
         // Initialize helpers
-        selection = new ReefSelection();
+        // selection = new ReefSelection();
 
         // Initialize compositions
-        routines = new Routines(this);
-        autos = new Autos(this);
+        // routines = new Routines(this);
+        // autos = new Autos(this);
 
         // Initialize controllers
         driver = new CommandXboxController(Constants.DRIVER);
@@ -62,13 +61,13 @@ public final class Robot extends LoggedRobot {
         // swerve.setDefaultCommand(swerve.drive(this::driverX, this::driverY, this::driverAngular));
 
         // Create triggers
-        Trigger allowGoosing = coDriver.a().negate();
+        // Trigger allowGoosing = coDriver.a().negate();
         // Trigger changedReference = RobotModeTriggers.teleop().and(swerve::changedReference);
-        Trigger poo = (driver.leftBumper().or(driver.rightBumper()).negate()).and(selection::isL1);
+        // Trigger poo = (driver.leftBumper().or(driver.rightBumper()).negate()).and(selection::isL1);
 
         // Driver bindings
-        driver.axisLessThan(kRightY.value, -0.5).onTrue(selection.incrementLevel());
-        driver.axisGreaterThan(kRightY.value, 0.5).onTrue(selection.decrementLevel());
+        // driver.axisLessThan(kRightY.value, -0.5).onTrue(selection.incrementLevel());
+        // driver.axisGreaterThan(kRightY.value, 0.5).onTrue(selection.decrementLevel());
         // driver.leftTrigger().onTrue(swerve.tareRotation());
 
         // driver.povLeft().onTrue(swerve.tareRotation());
@@ -81,15 +80,15 @@ public final class Robot extends LoggedRobot {
         // Co-driver bindings
         coDriver.a().onTrue(none()); // Reserved (No goosing around)
 
-        coDriver.povUp().onTrue(selection.incrementLevel());
-        coDriver.povDown().onTrue(selection.decrementLevel());
+        // coDriver.povUp().onTrue(selection.incrementLevel());
+        // coDriver.povDown().onTrue(selection.decrementLevel());
 
         // Setup lights
         // routines.lightsPreMatch(autos::defaultSelected).schedule();
 
-        RobotModeTriggers.autonomous().whileTrue(lights.sides.flames(false));
+        // RobotModeTriggers.autonomous().whileTrue(lights.sides.flames(false));
 
-        lights.sides.setDefaultCommand(lights.sides.levelSelection(selection));
+        // lights.sides.setDefaultCommand(lights.sides.levelSelection(selection));
 
         // Disable loop overrun warnings from the command
         // scheduler, since we already log loop timings
@@ -128,6 +127,6 @@ public final class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         Profiler.run("scheduler", scheduler::run);
-        Profiler.run("lights", lights::update);
+        // Profiler.run("lights", lights::update);
     }
 }

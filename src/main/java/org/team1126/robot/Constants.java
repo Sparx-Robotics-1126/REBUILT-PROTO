@@ -23,21 +23,18 @@ public final class Constants {
             new Translation3d(.387, 0, Units.inchesToMeters(8.5)),
             new Rotation3d(0.0, Math.toRadians(0.0), Math.toRadians(0.0))
         ),
-        new CameraConfig(
-            "left",
-            new Translation3d(.368, 0.05, Units.inchesToMeters(8.5)),
-            new Rotation3d(0.0, Math.toRadians(0.0), Math.toRadians(45.0))
-        ),
-        new CameraConfig(
-            "right",
-            new Translation3d(.368, -.05, Units.inchesToMeters(8.5)),
-            new Rotation3d(0.0, Math.toRadians(0.0), Math.toRadians(-45.0))
-        ),
-        new CameraConfig(
-            "objectDetection", 
-            null, 
-            null
-        )
+        // new CameraConfig(
+        //     "left",
+        //     new Translation3d(.368, 0.05, Units.inchesToMeters(8.5)),
+        //     new Rotation3d(0.0, Math.toRadians(0.0), Math.toRadians(45.0))
+        // ),
+        // new CameraConfig(
+        //     "right",
+        //     new Translation3d(.368, -.05, Units.inchesToMeters(8.5)),
+        //     new Rotation3d(0.0, Math.toRadians(0.0), Math.toRadians(-45.0))
+        // ),
+        new CameraConfig("Arducam_USB_Camera", null, null),
+        new CameraConfig("Fuel", null, null)
     };
 
     public static final class LowerCAN {
@@ -45,46 +42,41 @@ public final class Constants {
         public static final String LOWER_CAN = "LowerCAN";
 
         // Swerve
-        public static final int FL_MOVE = 2;
-        public static final int FL_TURN = 3;
-        public static final int FR_MOVE = 4;
-        public static final int FR_TURN = 5;
-        public static final int BL_MOVE = 6;
-        public static final int BL_TURN = 7;
-        public static final int BR_MOVE = 8;
-        public static final int BR_TURN = 9;
+        // public static final int FL_MOVE = 2;
+        // public static final int FL_TURN = 3;
+        // public static final int FR_MOVE = 4;
+        // public static final int FR_TURN = 5;
+        // public static final int BL_MOVE = 6;
+        // public static final int BL_TURN = 7;
+        // public static final int BR_MOVE = 8;
+        // public static final int BR_TURN = 9;
 
-        public static final int FL_ENCODER = 10;
-        public static final int FR_ENCODER = 11;
-        public static final int BL_ENCODER = 12;
-        public static final int BR_ENCODER = 13;
+        // public static final int FL_ENCODER = 10;
+        // public static final int FR_ENCODER = 11;
+        // public static final int BL_ENCODER = 12;
+        // public static final int BR_ENCODER = 13;
 
-        // Elevator
-        public static final int ELEVATOR_LEAD = 20;
-        public static final int ELEVATOR_FOLLOW = 21;
-        public static final int ELEVATOR_CANDI = 22;
+        // // Elevator
+        // public static final int ELEVATOR_LEAD = 20;
+        // public static final int ELEVATOR_FOLLOW = 21;
+        // public static final int ELEVATOR_CANDI = 22;
     }
 
     public static final class RioCAN {
-
         // Swerve
-        public static final int CANANDGYRO = 14;
-
-        // Goose
-        public static final int GOOSE_NECK = 30;
-        public static final int GOOSE_BEAK = 31;
-        public static final int GOOSE_CANDI = 32;
-
-        // Intake
-        public static final int INTAKE_MOTOR = 40;
-        public static final int INTAKE_CANRANGE = 41;
-
-        // Climber
-        public static final int CLIMBER_MOTOR = 50;
+        // public static final int CANANDGYRO = 14;
+        // // Goose
+        // public static final int GOOSE_NECK = 30;
+        // public static final int GOOSE_BEAK = 31;
+        // public static final int GOOSE_CANDI = 32;
+        // // Intake
+        // public static final int INTAKE_MOTOR = 40;
+        // public static final int INTAKE_CANRANGE = 41;
+        // // Climber
+        // public static final int CLIMBER_MOTOR = 50;
     }
 
     public static final class RioIO {
-
-        public static final int LIGHTS = 9;
+        // public static final int LIGHTS = 9;
     }
 }
