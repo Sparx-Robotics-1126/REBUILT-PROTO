@@ -28,7 +28,7 @@ public class MotorSubsystem extends GRRSubsystem {
      * @return the current speed
      */
     public double getSpeed() {
-        return rev.get();
+        return currSpeed.get();
     }
 
     /**
@@ -36,7 +36,7 @@ public class MotorSubsystem extends GRRSubsystem {
      * @param speed
      */
     public void setSpeed(double speed) {
-        rev.set(speed);
+        // rev.set(speed);
         currSpeed.set(speed);
     }
 
@@ -53,8 +53,9 @@ public class MotorSubsystem extends GRRSubsystem {
         //Supposed to display voltage
         SmartDashboard.putNumber("Bus Voltage", getVoltage());
         SmartDashboard.putNumber("Current Speed", currSpeed.get());
-        if (currSpeed.get() != getSpeed()) {
-            setSpeed(getSpeed());
-        }
+        setSpeed(currSpeed.get());
+        // if (currSpeed.get() != getSpeed()) {
+        //     setSpeed(getSpeed());
+        // }
     }
 }
