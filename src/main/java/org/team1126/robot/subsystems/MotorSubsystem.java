@@ -22,7 +22,10 @@ public class MotorSubsystem extends GRRSubsystem {
 
     private static final TunableTable tunables = Tunables.getNested("motor");
 
-    private static final TunableDouble volts = tunables.value("volts", .5);
+    private static final TunableDouble volts = tunables.value("volts", .1);
+
+    private static final TunableDouble Stall_Current_Limit = tunables.value("stall_current_limit", 40.0);
+    private static final TunableDouble Stall_Velocity_Limit = tunables.value("stall_velocity_limit", 50.0);
 
     private RelativeEncoder encoder;
 
@@ -42,12 +45,21 @@ public class MotorSubsystem extends GRRSubsystem {
         rev.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
+    public boolean isStalled() {
+        return (
+            Math.abs(encoder.getVelocity()) < Stall_Velocity_Limit.get()
+            && rev.getOutputCurrent() > Stall_Current_Limit.get()
+        );
+    }
+
     public void moveMotor() {
         rev.set(volts.get());
     }
 
     public Command moveMotorCommand() {
-        return commandBuilder().onExecute(() -> moveMotor());
+        return commandBuilder()
+            .onExecute(() -> moveMotor())
+            .onEnd(() -> rev.set(0));
     }
 
     /**
