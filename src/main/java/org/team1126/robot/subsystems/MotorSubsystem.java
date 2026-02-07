@@ -86,6 +86,14 @@ public class MotorSubsystem extends GRRSubsystem {
         return getVoltage() / getAmps();
     }
 
+    /**
+     * Returns the volcity in native units of RPM
+     * @return the velocity
+     */
+    public double getRPM() {
+        return encoder.getVelocity();
+    }
+
     @Override
     public void periodic() {
         //Supposed to display voltage
@@ -93,5 +101,6 @@ public class MotorSubsystem extends GRRSubsystem {
         SmartDashboard.putNumber("Current Speed", volts.get());
         SmartDashboard.putNumber("Motor Controller Amps", getAmps());
         SmartDashboard.putNumber("Motor Controller Ohms", getOhms());
+        SmartDashboard.putNumber("RPM", getRPM());
     }
 }
