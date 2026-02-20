@@ -70,10 +70,37 @@ public class MotorSubsystem extends GRRSubsystem {
         return rev.getBusVoltage();
     }
 
+    /**
+     * Gets the amps output by the motor
+     * @return the amps
+     */
+    public double getAmps() {
+        return rev.getOutputCurrent();
+    }
+
+    /**
+     * Gets the ohms by dividing volatage by amps
+     * @return the ohms
+     */
+    public double getOhms() {
+        return getVoltage() / getAmps();
+    }
+
+    /**
+     * Returns the volcity in native units of RPM
+     * @return the velocity
+     */
+    public double getRPM() {
+        return encoder.getVelocity();
+    }
+
     @Override
     public void periodic() {
         //Supposed to display voltage
-        SmartDashboard.putNumber("Bus Voltage", getVoltage());
+        SmartDashboard.putNumber("Motor Controller Voltage", getVoltage());
         SmartDashboard.putNumber("Current Speed", volts.get());
+        SmartDashboard.putNumber("Motor Controller Amps", getAmps());
+        SmartDashboard.putNumber("Motor Controller Ohms", getOhms());
+        SmartDashboard.putNumber("RPM", getRPM());
     }
 }
