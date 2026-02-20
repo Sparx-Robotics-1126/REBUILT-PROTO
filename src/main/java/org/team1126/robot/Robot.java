@@ -12,23 +12,26 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.logging.Profiler;
+import org.team1126.robot.commands.Routines;
+import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.MotorSubsystem;
+import org.team1126.robot.util.ReefSelection;
 
 @Logged
 public final class Robot extends LoggedRobot {
 
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
 
-    // public final Lights lights;
+    public final Lights lights;
     // public final Swerve swerve;
     //
     // public final CookieFinder cookieFinder;
 
     public final MotorSubsystem motorSub;
 
-    // public final ReefSelection selection;
+    public final ReefSelection selection;
 
-    // public final Routines routines;
+    public final Routines routines;
     // public final Autos autos;
 
     private final CommandXboxController driver;
@@ -39,17 +42,17 @@ public final class Robot extends LoggedRobot {
         // PhoenixUtil.disableDaemons();
 
         // Initialize subsystems
-        // lights = new Lights();
+        lights = new Lights();
         // swerve = new Swerve();
         // cookieFinder = new CookieFinder();
 
         motorSub = new MotorSubsystem();
 
         // Initialize helpers
-        // selection = new ReefSelection();
+        selection = new ReefSelection();
 
         // Initialize compositions
-        // routines = new Routines(this);
+        routines = new Routines(this);
         // autos = new Autos(this);
 
         // Initialize controllers
@@ -83,11 +86,13 @@ public final class Robot extends LoggedRobot {
         // coDriver.povDown().onTrue(selection.decrementLevel());
 
         // Setup lights
-        // routines.lightsPreMatch(autos::defaultSelected).schedule();
+        // routines.lightsSolidRed().schedule();
 
         // RobotModeTriggers.autonomous().whileTrue(lights.sides.flames(false));
 
-        // lights.sides.setDefaultCommand(lights.sides.levelSelection(selection));
+        lights.top.setDefaultCommand(lights.top.setSolidRed());
+        lights.sides.setDefaultCommand(lights.sides.setSolidRed());
+        //  lights.sides.setDefaultCommand(lights.sides.levelSelection(selection.isL4()));
 
         // Disable loop overrun warnings from the command
         // scheduler, since we already log loop timings
@@ -97,7 +102,24 @@ public final class Robot extends LoggedRobot {
         RobotController.setBrownoutVoltage(6.3);
 
         driver.a().whileTrue(motorSub.moveMotorCommand());
-
+        driver.povUp().whileTrue(lights.sides.shooting());
+        driver.povDown().whileTrue(lights.sides.chase(Lights.Color.SHOOTING));
+        driver.povLeft().whileTrue(lights.sides.convergeToMiddle(Lights.Color.SHOOTING));
+        driver.povRight().whileTrue(lights.sides.gradientChase(Lights.Color.RED));
+        driver.y().whileTrue(lights.sides.knightRider(Lights.Color.SHOOTING, Lights.Color.PURPLE));
+        driver
+            .x()
+            .whileTrue(
+                lights.sides.colorCyclingChase(
+                    Lights.Color.RED,
+                    Lights.Color.ORANGE,
+                    Lights.Color.SHOOTING,
+                    Lights.Color.LIME_GREEN,
+                    Lights.Color.CYAN,
+                    Lights.Color.BLUE,
+                    Lights.Color.PURPLE
+                )
+            );
         // Enable real-time thread priority
         enableRT(true);
     }
@@ -129,6 +151,6 @@ public final class Robot extends LoggedRobot {
     public void robotPeriodic() {
         Profiler.run("scheduler", scheduler::run);
         SmartDashboard.putBoolean("Motor_Stalled", motorSub.isStalled());
-        // Profiler.run("lights", lights::update);
+        Profiler.run("lights", lights::update);
     }
 }
