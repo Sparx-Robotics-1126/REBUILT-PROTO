@@ -7,15 +7,18 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.logging.Profiler;
 import org.team1126.robot.commands.Routines;
 import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.MotorSubsystem;
 import org.team1126.robot.util.ReefSelection;
+
+import com.ctre.phoenix6.Orchestra;
+import com.ctre.phoenix6.hardware.TalonFX;
 
 @Logged
 public final class Robot extends LoggedRobot {
@@ -35,10 +38,16 @@ public final class Robot extends LoggedRobot {
     // public final Autos autos;
 
     private final CommandXboxController driver;
+    private final Orchestra orchestra;
 
+       private TalonFX motor;
     // private final CommandXboxController coDriver;
 
     public Robot() {
+          this.motor = new TalonFX(15);
+          this.orchestra = new Orchestra();
+          this.orchestra.addInstrument(this.motor);
+
         // PhoenixUtil.disableDaemons();
 
         // Initialize subsystems
@@ -88,8 +97,7 @@ public final class Robot extends LoggedRobot {
         // Setup lights
         // routines.lightsSolidRed().schedule();
 
-        // RobotModeTriggers.autonomous().whileTrue(lights.sides.flames(false));
-
+        RobotModeTriggers.autonomous().whileTrue(routines.selfDriveLights());
         lights.top.setDefaultCommand(lights.top.setSolidRed());
         lights.sides.setDefaultCommand(lights.sides.setSolidRed());
         //  lights.sides.setDefaultCommand(lights.sides.levelSelection(selection.isL4()));
@@ -101,25 +109,28 @@ public final class Robot extends LoggedRobot {
         // Configure the brownout threshold to match RIO 1
         RobotController.setBrownoutVoltage(6.3);
 
-        driver.a().whileTrue(motorSub.moveMotorCommand());
+        driver.x().whileTrue(motorSub.moveIntakeTest(false));
+        driver.b().whileTrue(motorSub.moveIntakeTest(true));
         driver.povUp().whileTrue(lights.sides.shooting());
         driver.povDown().whileTrue(lights.sides.chase(Lights.Color.SHOOTING));
-        driver.povLeft().whileTrue(lights.sides.convergeToMiddle(Lights.Color.SHOOTING));
+        driver.povLeft().whileTrue(lights.top.convergeToMiddle(Lights.Color.SHOOTING));
         driver.povRight().whileTrue(lights.sides.gradientChase(Lights.Color.RED));
-        driver.y().whileTrue(lights.sides.knightRider(Lights.Color.SHOOTING, Lights.Color.PURPLE));
-        driver
-            .x()
-            .whileTrue(
-                lights.sides.colorCyclingChase(
-                    Lights.Color.RED,
-                    Lights.Color.ORANGE,
-                    Lights.Color.SHOOTING,
-                    Lights.Color.LIME_GREEN,
-                    Lights.Color.CYAN,
-                    Lights.Color.BLUE,
-                    Lights.Color.PURPLE
-                )
-            );
+        //driver.y().whileTrue(lights.top.knightRider(Lights.Color.BLUE, Lights.Color.RED));
+        driver.rightTrigger().whileTrue(routines.shootingLights());
+        // driver.b().whileTrue(routines.selfDriveLights());
+        // driver
+        //     .x()
+        //     .whileTrue(
+        //         lights.sides.colorCyclingChase(
+        //             Lights.Color.RED,
+        //             Lights.Color.ORANGE,
+        //             Lights.Color.SHOOTING,
+        //             Lights.Color.LIME_GREEN,
+        //             Lights.Color.CYAN,
+        //             Lights.Color.BLUE,
+        //             Lights.Color.PURPLE
+        //         )
+        //     );
         // Enable real-time thread priority
         enableRT(true);
     }
@@ -150,7 +161,7 @@ public final class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         Profiler.run("scheduler", scheduler::run);
-        SmartDashboard.putBoolean("Motor_Stalled", motorSub.isStalled());
+        //SmartDashboard.putBoolean("Motor_Stalled", motorSub.isStalled());
         Profiler.run("lights", lights::update);
     }
 }

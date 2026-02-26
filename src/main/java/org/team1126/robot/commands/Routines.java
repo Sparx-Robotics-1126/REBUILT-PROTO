@@ -34,6 +34,20 @@ public final class Routines {
         return lights.top.setSolidRed().withName("Routines.lightsSolidRed()");
         // return lights.top.setSolidRed();
     }
+
+    public Command shootingLights() {
+        return parallel(
+            lights.sides.chase(Lights.Color.SHOOTING),
+            lights.top.convergeToMiddle(Lights.Color.SHOOTING)
+        ).withName("Routines.shootingLights()");
+    }
+
+    public Command selfDriveLights() {
+        return parallel(
+            lights.sides.fade(Lights.Color.BLUE, Lights.Color.RED),
+            lights.top.knightRider(Lights.Color.BLUE, Lights.Color.RED)
+        ).withName("Routines.selfDriveLights()");
+    }
     /**
      * Displays the pre-match animation.
      * @param defaultAutoSelected If the default auto is selected.

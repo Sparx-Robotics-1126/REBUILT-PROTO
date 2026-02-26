@@ -419,9 +419,14 @@ public final class Lights {
          */
         public Command chase(Color color) {
             Mutable<Integer> position = new Mutable<>(0);
+            Mutable<Integer> frameCounter = new Mutable<>(0);
+            final double SPEED = .75; // Increase this number to slow down
 
             return commandBuilder()
-                .onInitialize(() -> position.value = 0)
+                .onInitialize(() -> {
+                    position.value = 0;
+                    frameCounter.value = 0;
+                })
                 .onExecute(() -> {
                     // Clear all LEDs for both sides
                     for (int i = 0; i < LENGTH; i++) {
@@ -443,63 +448,15 @@ public final class Lights {
                         }
                     }
 
-                    position.value = (position.value + 1) % LENGTH;
+                    // Update position only every SPEED frames
+                    if (frameCounter.value++ >= SPEED) {
+                        frameCounter.value = 0;
+                        position.value = (position.value + 1) % LENGTH;
+                    }
                 })
                 .onEnd(() -> setBoth(Color.OFF))
                 .ignoringDisable(true)
                 .withName("Lights.Sides.chase()");
-        }
-
-        /**
-         * Converging chase animation where LEDs chase from both ends of a segment toward the middle.
-         * @param color The color to chase with.
-         */
-        public Command convergeToMiddle(Color color) {
-            Mutable<Integer> position = new Mutable<>(0);
-            final int MIDDLE = LENGTH / 2;
-
-            return commandBuilder()
-                .onInitialize(() -> position.value = 0)
-                .onExecute(() -> {
-                    // Clear all LEDs
-                    for (int i = 0; i < LENGTH; i++) {
-                        for (int j = 0; j <= 1; j++) {
-                            setSingle(j == 0, i, Color.OFF);
-                        }
-                    }
-
-                    // Chase from left edge (0) toward middle
-                    for (int trail = 0; trail < 3; trail++) {
-                        int index = position.value - trail;
-                        if (index >= 0 && index < MIDDLE) {
-                            int fadeR = (trail == 0) ? color.r() : (color.r() * (3 - trail)) / 3;
-                            int fadeG = (trail == 0) ? color.g() : (color.g() * (3 - trail)) / 3;
-                            int fadeB = (trail == 0) ? color.b() : (color.b() * (3 - trail)) / 3;
-                            setSingle(false, index, fadeR, fadeG, fadeB); // Left side
-                        }
-                    }
-
-                    // Chase from right edge (LENGTH-1) toward middle, mirrored
-                    for (int trail = 0; trail < 3; trail++) {
-                        int index = LENGTH - 1 - (position.value - trail);
-                        if (index >= MIDDLE && index < LENGTH) {
-                            int fadeR = (trail == 0) ? color.r() : (color.r() * (3 - trail)) / 3;
-                            int fadeG = (trail == 0) ? color.g() : (color.g() * (3 - trail)) / 3;
-                            int fadeB = (trail == 0) ? color.b() : (color.b() * (3 - trail)) / 3;
-                            setSingle(false, index, fadeR, fadeG, fadeB); // Same left side
-                        }
-                    }
-
-                    // Loop animation
-                    if (position.value < MIDDLE) {
-                        position.value++;
-                    } else {
-                        position.value = 0;
-                    }
-                })
-                .onEnd(() -> setBoth(Color.OFF))
-                .ignoringDisable(true)
-                .withName("Lights.Sides.convergeToMiddle()");
         }
 
         /**
@@ -630,68 +587,6 @@ public final class Lights {
         }
 
         /**
-         * Knight Rider effect: the entire segment is filled with a base color, and a brighter
-         * chase animates back and forth on top of it to create the classic Knight Rider look.
-         * @param baseColor The base color that fills the entire segment.
-         * @param chaseColor The brighter chase color that animates back and forth.
-         */
-        public Command knightRider(Color baseColor, Color chaseColor) {
-            Mutable<Integer> position = new Mutable<>(0);
-            Mutable<Boolean> movingRight = new Mutable<>(true);
-            Mutable<Integer> frameCounter = new Mutable<>(0);
-            final int SPEED = 2; // Increase this number to slow down
-
-            return commandBuilder()
-                .onInitialize(() -> {
-                    position.value = 0;
-                    movingRight.value = true;
-                    frameCounter.value = 0;
-                })
-                .onExecute(() -> {
-                    // Fill entire segment with base color
-                    for (int i = 0; i < LENGTH; i++) {
-                        for (int j = 0; j <= 1; j++) {
-                            setSingle(j == 0, i, baseColor);
-                        }
-                    }
-
-                    // Draw solid chase blob on top of base color
-                    final int CHASE_WIDTH = 3;
-                    for (int offset = -CHASE_WIDTH; offset <= CHASE_WIDTH; offset++) {
-                        int index = position.value + offset;
-                        if (index >= 0 && index < LENGTH) {
-                            setSingle(false, index, chaseColor); // Right side
-                        }
-                    }
-
-                    // Update position only every SPEED frames
-                    if (frameCounter.value++ >= SPEED) {
-                        frameCounter.value = 0;
-
-                        // Move in current direction
-                        if (movingRight.value) {
-                            position.value++;
-                            // Reached right edge, reverse direction
-                            if (position.value >= LENGTH) {
-                                position.value = LENGTH - 1;
-                                movingRight.value = false;
-                            }
-                        } else {
-                            position.value--;
-                            // Reached left edge, reverse direction
-                            if (position.value < 0) {
-                                position.value = 0;
-                                movingRight.value = true;
-                            }
-                        }
-                    }
-                })
-                .onEnd(() -> setBoth(Color.OFF))
-                .ignoringDisable(true)
-                .withName("Lights.Sides.knightRider()");
-        }
-
-        /**
          * Color cycling chase: a chase that cycles through an array of colors. As the chase moves,
          * it changes the segment color to match the current chase color, creating a cycling effect.
          * @param colors Array of colors to cycle through in sequence.
@@ -762,6 +657,72 @@ public final class Lights {
                 .ignoringDisable(true)
                 .withName("Lights.Sides.colorCyclingChase()");
         }
+
+        /**
+         * Fade animation that cycles through: OFF → color1 fades in → color1 fades out → OFF → color2 fades in → color2 fades out → repeat
+         * @param color1 The first color to fade in and out.
+         * @param color2 The second color to fade in and out.
+         */
+        public Command fade(Color color1, Color color2) {
+            Mutable<Integer> frameCounter = new Mutable<>(0);
+            final int FADE_DURATION = 35; // Frames for fade in or fade out
+            final int OFF_DURATION = 5; // Frames to stay off between fades
+            final int CYCLE_DURATION = (FADE_DURATION * 2 + OFF_DURATION) * 2; // Full cycle with both colors
+
+            return commandBuilder()
+                .onInitialize(() -> frameCounter.value = 0)
+                .onExecute(() -> {
+                    // Increment frame counter
+                    frameCounter.value++;
+                    int cyclePos = frameCounter.value % CYCLE_DURATION;
+
+                    int r = 0,
+                        g = 0,
+                        b = 0;
+
+                    // Color 1 sequence: OFF → fade in → fade out → OFF
+                    if (cyclePos < FADE_DURATION) {
+                        // Fade color1 in
+                        double factor = cyclePos / (double) FADE_DURATION;
+                        r = (int) (color1.r() * factor);
+                        g = (int) (color1.g() * factor);
+                        b = (int) (color1.b() * factor);
+                    } else if (cyclePos < FADE_DURATION * 2) {
+                        // Fade color1 out
+                        double factor = (FADE_DURATION * 2 - cyclePos) / (double) FADE_DURATION;
+                        r = (int) (color1.r() * factor);
+                        g = (int) (color1.g() * factor);
+                        b = (int) (color1.b() * factor);
+                    } else if (cyclePos < FADE_DURATION * 2 + OFF_DURATION) {
+                        // Off period
+                        r = 0;
+                        g = 0;
+                        b = 0;
+                    }
+                    // Color 2 sequence: OFF → fade in → fade out → OFF
+                    else if (cyclePos < FADE_DURATION * 3 + OFF_DURATION) {
+                        // Fade color2 in
+                        double factor = (cyclePos - FADE_DURATION * 2 - OFF_DURATION) / (double) FADE_DURATION;
+                        r = (int) (color2.r() * factor);
+                        g = (int) (color2.g() * factor);
+                        b = (int) (color2.b() * factor);
+                    } else if (cyclePos < FADE_DURATION * 4 + OFF_DURATION) {
+                        // Fade color2 out
+                        double factor = (FADE_DURATION * 4 + OFF_DURATION - cyclePos) / (double) FADE_DURATION;
+                        r = (int) (color2.r() * factor);
+                        g = (int) (color2.g() * factor);
+                        b = (int) (color2.b() * factor);
+                    }
+
+                    // Apply the faded color to all LEDs on both sides
+                    for (int i = 0; i < LENGTH; i++) {
+                        setBoth(i, r, g, b);
+                    }
+                })
+                .onEnd(() -> setBoth(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Sides.fade()");
+        }
     }
 
     @Logged
@@ -780,6 +741,11 @@ public final class Lights {
         private void set(int i, Color color) {
             if (i >= LENGTH) return;
             buffer.setRGB(LENGTH + i, color.r(), color.g(), color.b());
+        }
+
+        private void set(int i, int r, int g, int b) {
+            if (i >= LENGTH) return;
+            buffer.setRGB(LENGTH + i, r, g, b);
         }
 
         public Command setSolidRed() {
@@ -833,17 +799,6 @@ public final class Lights {
                 .repeatedly()
                 .ignoringDisable(true)
                 .withName("Lights.Top.coralDisplay()");
-        }
-
-        /**
-         * Displays that the goose has been killed.
-         */
-        public Command gooseAssassination() {
-            return commandBuilder()
-                .onInitialize(() -> set(Color.GOOSE_ASSASSINATION))
-                .onEnd(() -> set(Color.OFF))
-                .ignoringDisable(true)
-                .withName("Lights.Top.gooseAssassination()");
         }
 
         /**
@@ -962,6 +917,126 @@ public final class Lights {
                 .onInitialize(() -> set(Color.OFF))
                 .ignoringDisable(true)
                 .withName("Lights.Top.off()");
+        }
+
+        /**
+         * Knight Rider effect: the entire segment is filled with a base color, and a brighter
+         * chase animates back and forth on top of it to create the classic Knight Rider look.
+         * @param baseColor The base color that fills the entire segment.
+         * @param chaseColor The brighter chase color that animates back and forth.
+         */
+        public Command knightRider(Color baseColor, Color chaseColor) {
+            Mutable<Integer> position = new Mutable<>(0);
+            Mutable<Boolean> movingRight = new Mutable<>(true);
+            Mutable<Integer> frameCounter = new Mutable<>(0);
+            final int SPEED = 2; // Increase this number to slow down
+
+            return commandBuilder()
+                .onInitialize(() -> {
+                    position.value = 0;
+                    movingRight.value = true;
+                    frameCounter.value = 0;
+                })
+                .onExecute(() -> {
+                    // Fill entire segment with base color
+                    for (int i = 0; i < LENGTH; i++) {
+                        set(i, baseColor);
+                    }
+
+                    // Draw solid chase blob on top of base color
+                    final int CHASE_WIDTH = 3;
+                    for (int offset = -CHASE_WIDTH; offset <= CHASE_WIDTH; offset++) {
+                        int index = position.value + offset;
+                        if (index >= 0 && index < LENGTH) {
+                            set(index, chaseColor);
+                        }
+                    }
+
+                    // Update position only every SPEED frames
+                    if (frameCounter.value++ >= SPEED) {
+                        frameCounter.value = 0;
+
+                        // Move in current direction
+                        if (movingRight.value) {
+                            position.value++;
+                            // Reached right edge, reverse direction
+                            if (position.value >= LENGTH) {
+                                position.value = LENGTH - 1;
+                                movingRight.value = false;
+                            }
+                        } else {
+                            position.value--;
+                            // Reached left edge, reverse direction
+                            if (position.value < 0) {
+                                position.value = 0;
+                                movingRight.value = true;
+                            }
+                        }
+                    }
+                })
+                .onEnd(() -> set(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Top.knightRider()");
+        }
+
+        /**
+         * Converging chase animation where LEDs chase from both ends of the top segment toward the middle.
+         * @param color The color to chase with.
+         */
+        public Command convergeToMiddle(Color color) {
+            Mutable<Integer> position = new Mutable<>(0);
+            Mutable<Integer> frameCounter = new Mutable<>(0);
+            final int MIDDLE = LENGTH / 2;
+            final double SPEED = 2.0; // Increase this number to slow down
+
+            return commandBuilder()
+                .onInitialize(() -> {
+                    position.value = 0;
+                    frameCounter.value = 0;
+                })
+                .onExecute(() -> {
+                    // Clear all LEDs
+                    for (int i = 0; i < LENGTH; i++) {
+                        set(i, Color.OFF);
+                    }
+
+                    // Chase from left edge (0) toward middle
+                    for (int trail = 0; trail < 3; trail++) {
+                        int index = position.value - trail;
+                        if (index >= 0 && index < MIDDLE) {
+                            int fadeR = (trail == 0) ? color.r() : (color.r() * (3 - trail)) / 3;
+                            int fadeG = (trail == 0) ? color.g() : (color.g() * (3 - trail)) / 3;
+                            int fadeB = (trail == 0) ? color.b() : (color.b() * (3 - trail)) / 3;
+                            set(index, fadeR, fadeG, fadeB);
+                        }
+                    }
+
+                    // Chase from right edge (LENGTH-1) toward middle, mirrored
+                    for (int trail = 0; trail < 3; trail++) {
+                        int index = LENGTH - 1 - (position.value - trail);
+                        if (index >= MIDDLE && index < LENGTH) {
+                            int fadeR = (trail == 0) ? color.r() : (color.r() * (3 - trail)) / 3;
+                            int fadeG = (trail == 0) ? color.g() : (color.g() * (3 - trail)) / 3;
+                            int fadeB = (trail == 0) ? color.b() : (color.b() * (3 - trail)) / 3;
+                            set(index, fadeR, fadeG, fadeB);
+                        }
+                    }
+
+                    // Update position only every SPEED frames
+                    if (frameCounter.value++ >= SPEED) {
+                        frameCounter.value = 0;
+
+                        // Loop animation
+                        if (position.value < MIDDLE) {
+                            position.value++;
+                        } else {
+                            position.value = 0;
+                        }
+                    }
+                })
+                .onEnd(() -> set(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Top.convergeToMiddle()");
         }
     }
 }
