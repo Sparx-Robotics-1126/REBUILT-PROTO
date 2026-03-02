@@ -17,9 +17,6 @@ import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.MotorSubsystem;
 import org.team1126.robot.util.ReefSelection;
 
-import com.ctre.phoenix6.Orchestra;
-import com.ctre.phoenix6.hardware.TalonFX;
-
 @Logged
 public final class Robot extends LoggedRobot {
 
@@ -38,15 +35,17 @@ public final class Robot extends LoggedRobot {
     // public final Autos autos;
 
     private final CommandXboxController driver;
-    private final Orchestra orchestra;
 
-       private TalonFX motor;
+    // private final Orchestra orchestra;
+
+    // private TalonFX motor;
+
     // private final CommandXboxController coDriver;
 
     public Robot() {
-          this.motor = new TalonFX(15);
-          this.orchestra = new Orchestra();
-          this.orchestra.addInstrument(this.motor);
+        // this.motor = new TalonFX(15);
+        // this.orchestra = new Orchestra();
+        // this.orchestra.addInstrument(this.motor);
 
         // PhoenixUtil.disableDaemons();
 
@@ -109,8 +108,12 @@ public final class Robot extends LoggedRobot {
         // Configure the brownout threshold to match RIO 1
         RobotController.setBrownoutVoltage(6.3);
 
-        driver.x().whileTrue(motorSub.moveIntakeTest(false));
-        driver.b().whileTrue(motorSub.moveIntakeTest(true));
+        // driver.x().whileTrue(motorSub.moveIntakeTest(false));
+        // driver.b().whileTrue(motorSub.moveIntakeTest(true));
+
+        driver.y().whileTrue(motorSub.extendIntakeTest());
+        driver.a().whileTrue(motorSub.retrackIntakeTest());
+
         driver.povUp().whileTrue(lights.sides.shooting());
         driver.povDown().whileTrue(lights.sides.chase(Lights.Color.SHOOTING));
         driver.povLeft().whileTrue(lights.top.convergeToMiddle(Lights.Color.SHOOTING));
