@@ -111,31 +111,32 @@ public final class Robot extends LoggedRobot {
         // driver.x().whileTrue(motorSub.moveIntakeTest(false));
         // driver.b().whileTrue(motorSub.moveIntakeTest(true));
 
-        driver.y().whileTrue(motorSub.extendIntakeTest());
-        driver.a().whileTrue(motorSub.retrackIntakeTest());
+        // driver.y().whileTrue(motorSub.extendIntakeTest());
+        // driver.a().whileTrue(motorSub.retrackIntakeTest());
 
-        driver.povUp().whileTrue(lights.sides.shooting());
-        driver.povDown().whileTrue(lights.sides.chase(Lights.Color.SHOOTING));
+        driver.povUp().whileTrue(lights.sides.lightningMcQueenChase());
+        //driver.povDown().whileTrue(lights.rainbow());
         driver.povLeft().whileTrue(lights.top.convergeToMiddle(Lights.Color.SHOOTING));
         driver.povRight().whileTrue(lights.sides.gradientChase(Lights.Color.RED));
-        //driver.y().whileTrue(lights.top.knightRider(Lights.Color.BLUE, Lights.Color.RED));
+        driver.y().whileTrue(lights.top.knightRider(Lights.Color.BLUE, Lights.Color.RED));
         driver.rightTrigger().whileTrue(routines.shootingLights());
-        // driver.b().whileTrue(routines.selfDriveLights());
-        // driver
-        //     .x()
-        //     .whileTrue(
-        //         lights.sides.colorCyclingChase(
-        //             Lights.Color.RED,
-        //             Lights.Color.ORANGE,
-        //             Lights.Color.SHOOTING,
-        //             Lights.Color.LIME_GREEN,
-        //             Lights.Color.CYAN,
-        //             Lights.Color.BLUE,
-        //             Lights.Color.PURPLE
-        //         )
-        //     );
+        driver.b().whileTrue(routines.selfDriveLights());
+        driver
+            .x()
+            .whileTrue(
+                lights.sides.colorCyclingChase(
+                    Lights.Color.RED,
+                    Lights.Color.ORANGE,
+                    Lights.Color.SHOOTING,
+                    Lights.Color.LIME_GREEN,
+                    Lights.Color.CYAN,
+                    Lights.Color.BLUE,
+                    Lights.Color.PURPLE
+                )
+            );
         // Enable real-time thread priority
-        enableRT(true);
+        //enableRT(true);
+        //driver.x().whileTrue(Lights.sides.LightningMcQueenChase())
     }
 
     /**

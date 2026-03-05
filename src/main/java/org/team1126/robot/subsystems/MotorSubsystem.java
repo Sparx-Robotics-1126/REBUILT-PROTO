@@ -55,7 +55,7 @@ public class MotorSubsystem extends GRRSubsystem {
         // pivotEncoder = pivotMotor.getAbsoluteEncoder();
         pivotConfig = new SparkMaxConfig();
         pivotController = pivotMotor.getClosedLoopController();
-        
+
         pivotConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .p(.9, ClosedLoopSlot.kSlot0)

@@ -555,7 +555,8 @@ public final class Lights {
                             int g = (int) (color.g() * gradientFactor);
                             int b = (int) (color.b() * gradientFactor);
 
-                            setSingle(false, index, r, g, b); // Right side
+                            // Apply gradient to both sides
+                            setBoth(index, r, g, b);
                         }
                     }
 
@@ -656,6 +657,69 @@ public final class Lights {
                 .onEnd(() -> setBoth(Color.OFF))
                 .ignoringDisable(true)
                 .withName("Lights.Sides.colorCyclingChase()");
+        }
+
+        /**
+         * Lightning McQueen chase: very fast chase using McQueen-esque colors (red, yellow, white).
+         * The blob is a multi-LED "bolt" with a bright white tip; designed to run very fast.
+         */
+        public Command lightningMcQueenChase() {
+            Mutable<Integer> position = new Mutable<>(0);
+            Mutable<Integer> frameCounter = new Mutable<>(0);
+            final int SPEED = 1; // 1 = very fast; increase to slow down
+            final int BLOB_WIDTH = 7; // narrower blob to look more like a car
+
+            final List<Color> PATTERN = List.of(
+                Color.RED, // center / main body
+                Color.GOLD, // lightning stripe
+                Color.WHITE, // small highlight
+                Color.GOLD,
+                Color.RED
+            );
+
+            return commandBuilder()
+                .onInitialize(() -> {
+                    position.value = 0;
+                    frameCounter.value = 0;
+                })
+                .onExecute(() -> {
+                    // Clear both sides
+                    setBoth(Color.OFF);
+
+                    // Draw blob centered at position with pattern and a smooth fade outward
+                    for (int offset = 0; offset < BLOB_WIDTH; offset++) {
+                        int index = (position.value - offset + LENGTH) % LENGTH;
+                        if (index < 0 || index >= LENGTH) continue;
+
+                        Color c = PATTERN.get(Math.min(offset, PATTERN.size() - 1));
+                        double fade = 1.0 - (offset / (double) BLOB_WIDTH); // center brightest
+                        // Slight nonlinear falloff for punchy center
+                        fade = fade * fade;
+
+                        int r = (int) (c.r() * fade);
+                        int g = (int) (c.g() * fade);
+                        int b = (int) (c.b() * fade);
+
+                        setBoth(index, r, g, b);
+                    }
+
+                    // Add a small gold/yellow tip just ahead of the blob for the "Lightning McQueen" effect
+                    int tipIndex = (position.value + 1) % LENGTH;
+                    // Slightly dim the tip for a more natural highlight
+                    int tipR = (int) (Color.GOLD.r() * 0.95);
+                    int tipG = (int) (Color.GOLD.g() * 0.95);
+                    int tipB = (int) (Color.GOLD.b() * 0.95);
+                    setBoth(tipIndex, tipR, tipG, tipB);
+
+                    // Advance position quickly
+                    if (frameCounter.value++ >= SPEED) {
+                        frameCounter.value = 0;
+                        position.value = (position.value + 1) % LENGTH;
+                    }
+                })
+                .onEnd(() -> setBoth(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Sides.lightningMcQueenChase()");
         }
 
         /**
