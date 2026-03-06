@@ -121,19 +121,13 @@ public final class Robot extends LoggedRobot {
         driver.y().whileTrue(lights.top.knightRider(Lights.Color.BLUE, Lights.Color.RED));
         driver.rightTrigger().whileTrue(routines.shootingLights());
         driver.b().whileTrue(routines.selfDriveLights());
-        driver
-            .x()
-            .whileTrue(
-                lights.sides.colorCyclingChase(
-                    Lights.Color.RED,
-                    Lights.Color.ORANGE,
-                    Lights.Color.SHOOTING,
-                    Lights.Color.LIME_GREEN,
-                    Lights.Color.CYAN,
-                    Lights.Color.BLUE,
-                    Lights.Color.PURPLE
-                )
-            );
+        // replaced colorCyclingChase binding with alliance fade on X button
+        // Original: driver.x().whileTrue(lights.sides.colorCyclingChase(...));
+        driver.x().whileTrue(parallel(lights.sides.fadeAllianceSlow(), lights.top.fadeAllianceSlow()));
+
+        // Pair bumpers: left = moving intake (rev=false), right = moving intake (rev=true)
+        driver.leftBumper().whileTrue(parallel(lights.sides.movingIntake(false), lights.top.movingIntake(false)));
+        driver.rightBumper().whileTrue(parallel(lights.sides.movingIntake(true), lights.top.movingIntake(true)));
         // Enable real-time thread priority
         //enableRT(true);
         //driver.x().whileTrue(Lights.sides.LightningMcQueenChase())

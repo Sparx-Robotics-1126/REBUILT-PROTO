@@ -35,6 +35,8 @@ public final class Lights {
 
     private static final int LENGTH = 21;
     private static final int COUNT = 3;
+    private static final double ALLIANCE_FADE_PERIOD = 5.0; // seconds for a full fade cycle (slightly quicker)
+    private static final double MOVING_INTAKE_PHASE = 1.0; // seconds per segment (top then sides) - faster
 
     private static final TunableTable tunables = Tunables.getNested("lights");
 
@@ -787,6 +789,85 @@ public final class Lights {
                 .ignoringDisable(true)
                 .withName("Lights.Sides.fade()");
         }
+
+        /**
+         * Slow fade to alliance color and back to black, repeated.
+         */
+        public Command fadeAllianceSlow() {
+            // Use a smooth time-based sinusoidal fade to avoid discrete jumps or brief brighten spikes.
+            return commandBuilder()
+                .onExecute(() -> {
+                    double t = Timer.getFPGATimestamp();
+                    double phase = (t % ALLIANCE_FADE_PERIOD) / ALLIANCE_FADE_PERIOD; // [0,1)
+                    // Sinusoid mapped to [0,1], starts at 0, rises to 1, back to 0
+                    double factor = 0.5 * (1.0 + Math.sin(2.0 * Math.PI * phase - Math.PI / 2.0));
+                    factor = MathUtil.clamp(factor, 0.0, 1.0);
+
+                    Color alliance = Alliance.isBlue() ? Color.BLUE : Color.RED;
+                    int r = (int) Math.round(alliance.r() * factor);
+                    int g = (int) Math.round(alliance.g() * factor);
+                    int b = (int) Math.round(alliance.b() * factor);
+
+                    for (int i = 0; i < LENGTH; i++) {
+                        setBoth(i, r, g, b);
+                    }
+                })
+                .onEnd(() -> setBoth(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Sides.fadeAllianceSlow()");
+        }
+
+        /**
+         * Moving intake visual for sides with speed scaling.
+         * @param rev direction flag
+         * @param speedScale >1.0 = faster, <1.0 = slower
+         */
+        public Command movingIntake(boolean rev) {
+            final int BLOB = 3;
+
+            return commandBuilder()
+                .onExecute(() -> {
+                    // Editable local speed modifier: change this value to adjust the sides moving intake speed.
+                    // Values > 1.0 = faster, < 1.0 = slower. Example: 1.5 for 50% faster.
+                    double speedScale = 5.0;
+                    double now = Timer.getFPGATimestamp();
+                    double total = (MOVING_INTAKE_PHASE * 2.0) / Math.max(1e-6, speedScale);
+                    double phase = (now % total) / total; // [0,1)
+
+                    boolean sidesActive = rev ? (phase < 0.5) : (phase >= 0.5);
+                    double progress = sidesActive ? ((phase - (rev ? 0.0 : 0.5)) * 2.0) : 0.0; // 0..1
+
+                    // clear
+                    for (int i = 0; i < LENGTH; i++) setBoth(i, Color.OFF);
+
+                    if (sidesActive) {
+                        // For rev==false we want blobs to start at the bottom (index 0) and move toward the top (index LENGTH-1).
+                        // For rev==true the direction is reversed (start at top and move toward bottom).
+                        double rawPos;
+                        if (!rev) {
+                            rawPos = progress * (LENGTH - 1); // 0 -> top
+                        } else {
+                            rawPos = (1.0 - progress) * (LENGTH - 1); // top -> 0
+                        }
+
+                        int center = (int) Math.round(rawPos);
+                        Color alliance = Alliance.isBlue() ? Color.BLUE : Color.RED;
+                        for (int off = 0; off < BLOB; off++) {
+                            int idx = center - off;
+                            if (idx >= 0 && idx < LENGTH) {
+                                double fadeFactor = 1.0 - (off / (double) BLOB);
+                                int r = (int) Math.round(alliance.r() * fadeFactor);
+                                int g = (int) Math.round(alliance.g() * fadeFactor);
+                                int b = (int) Math.round(alliance.b() * fadeFactor);
+                                setBoth(idx, r, g, b);
+                            }
+                        }
+                    }
+                })
+                .onEnd(() -> setBoth(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Sides.movingIntake(" + rev + ")");
+        }
     }
 
     @Logged
@@ -1101,6 +1182,88 @@ public final class Lights {
                 .onEnd(() -> set(Color.OFF))
                 .ignoringDisable(true)
                 .withName("Lights.Top.convergeToMiddle()");
+        }
+
+        /**
+         * Slow fade to alliance color and back to black for the top strip.
+         */
+        public Command fadeAllianceSlow() {
+            return commandBuilder()
+                .onExecute(() -> {
+                    double t = Timer.getFPGATimestamp();
+                    double phase = (t % ALLIANCE_FADE_PERIOD) / ALLIANCE_FADE_PERIOD;
+                    double factor = 0.5 * (1.0 + Math.sin(2.0 * Math.PI * phase - Math.PI / 2.0));
+                    factor = MathUtil.clamp(factor, 0.0, 1.0);
+
+                    Color alliance = Alliance.isBlue() ? Color.BLUE : Color.RED;
+                    int r = (int) Math.round(alliance.r() * factor);
+                    int g = (int) Math.round(alliance.g() * factor);
+                    int b = (int) Math.round(alliance.b() * factor);
+
+                    for (int i = 0; i < LENGTH; i++) set(i, r, g, b);
+                })
+                .onEnd(() -> set(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Top.fadeAllianceSlow()");
+        }
+
+        /**
+         * Moving intake visual for top. rev==false: converge to middle; rev==true: expand from middle outward.
+         */
+        public Command movingIntake(boolean rev) {
+            final int WIDTH = 2;
+            final int MIDDLE = LENGTH / 2;
+
+            return commandBuilder()
+                .onExecute(() -> {
+                    // Editable local speed modifier: change this value to adjust the top moving intake speed.
+                    // Values > 1.0 = faster, < 1.0 = slower. Example: 1.2 for 20% faster.
+                    double speedScale = 5.0;
+                    final double total = (MOVING_INTAKE_PHASE * 2.0) / Math.max(1e-6, speedScale);
+                    double now = Timer.getFPGATimestamp();
+                    double phase = (now % total) / total; // [0,1)
+
+                    boolean topActive = rev ? (phase >= 0.5) : (phase < 0.5);
+                    double progress = topActive ? ((phase - (topActive && !rev ? 0.0 : 0.5)) * 2.0) : 0.0;
+
+                    // clear
+                    for (int i = 0; i < LENGTH; i++) set(i, Color.OFF);
+
+                    Color alliance = Alliance.isBlue() ? Color.BLUE : Color.RED;
+
+                    if (topActive) {
+                        // When active, progress goes 0->1. For converge (rev==false) we light from edges toward middle.
+                        if (!rev) {
+                            int base = (int) Math.round(progress * MIDDLE);
+                            for (int trail = 0; trail < WIDTH; trail++) {
+                                int leftIdx = base - trail;
+                                int rightIdx = (LENGTH - 1 - base) + trail;
+                                double fadeFactor = 1.0 - (trail / (double) WIDTH);
+                                int r = (int) Math.round(alliance.r() * fadeFactor);
+                                int g = (int) Math.round(alliance.g() * fadeFactor);
+                                int b = (int) Math.round(alliance.b() * fadeFactor);
+                                if (leftIdx >= 0 && leftIdx < LENGTH) set(leftIdx, r, g, b);
+                                if (rightIdx >= 0 && rightIdx < LENGTH) set(rightIdx, r, g, b);
+                            }
+                        } else {
+                            // reverse: expand from middle outward
+                            int base = (int) Math.round(progress * MIDDLE);
+                            for (int trail = 0; trail < WIDTH; trail++) {
+                                int leftIdx = MIDDLE - base - trail;
+                                int rightIdx = MIDDLE + base + trail;
+                                double fadeFactor = 1.0 - (trail / (double) WIDTH);
+                                int r = (int) Math.round(alliance.r() * fadeFactor);
+                                int g = (int) Math.round(alliance.g() * fadeFactor);
+                                int b = (int) Math.round(alliance.b() * fadeFactor);
+                                if (leftIdx >= 0 && leftIdx < LENGTH) set(leftIdx, r, g, b);
+                                if (rightIdx >= 0 && rightIdx < LENGTH) set(rightIdx, r, g, b);
+                            }
+                        }
+                    }
+                })
+                .onEnd(() -> set(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Top.movingIntake(" + rev + ")");
         }
     }
 }
