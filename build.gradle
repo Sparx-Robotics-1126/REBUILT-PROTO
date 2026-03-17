@@ -3,7 +3,7 @@ plugins {
     id "edu.wpi.first.GradleRIO" version "2026.2.1"
     // id "com.diffplug.spotless" version "8.2.1"
     id 'com.github.node-gradle.node' version '7.1.0'
-}
+} 
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
