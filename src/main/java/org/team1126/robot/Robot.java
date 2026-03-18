@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.logging.Profiler;
 import org.team1126.robot.commands.Routines;
+import org.team1126.robot.subsystems.KrakenTest;
 import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.MotorSubsystem;
 import org.team1126.robot.util.ReefSelection;
@@ -27,10 +28,10 @@ public final class Robot extends LoggedRobot {
     //
     // public final CookieFinder cookieFinder;
 
-    public final MotorSubsystem motorSub;
+    // public final MotorSubsystem motorSub;
 
-    public final ReefSelection selection;
-
+    // public final ReefSelection selection;
+public final KrakenTest krakenTest;
     public final Routines routines;
     // public final Autos autos;
 
@@ -51,13 +52,14 @@ public final class Robot extends LoggedRobot {
 
         // Initialize subsystems
         lights = new Lights();
+        krakenTest = new KrakenTest();
         // swerve = new Swerve();
         // cookieFinder = new CookieFinder();
 
-        motorSub = new MotorSubsystem();
+        // motorSub = new MotorSubsystem();
 
         // Initialize helpers
-        selection = new ReefSelection();
+        // selection = new ReefSelection();
 
         // Initialize compositions
         routines = new Routines(this);
@@ -65,6 +67,7 @@ public final class Robot extends LoggedRobot {
 
         // Initialize controllers
         driver = new CommandXboxController(Constants.DRIVER);
+        driver.a().whileTrue(krakenTest.runMotor());
         // coDriver = new CommandXboxController(Constants.CO_DRIVER);
 
         // Set default commands

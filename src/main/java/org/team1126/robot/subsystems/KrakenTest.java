@@ -1,12 +1,15 @@
 package org.team1126.robot.subsystems;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import org.team1126.lib.tunable.TunableTable;
@@ -23,37 +26,67 @@ public final class KrakenTest extends GRRSubsystem {
    private final VelocityTorqueCurrentFOC motorVelocityControl;
 
    public KrakenTest() {
-        motor = new TalonFX(5,"RoboRio");
+        motor = new TalonFX(15, new CANBus("TestCAN")); // or the name your CTRE docs use for the roboRIO bus
      this.motorVelocity = tunables.value("velocity", 0.254);
 
  configureMotor();
 
            PhoenixUtil.run(() ->
-            ParentDevice.optimizeBusUtilizationForAll(4,    motor)
+            ParentDevice.optimizeBusUtilizationForAll(15,    motor)
         );
 
          motorVelocityControl = new VelocityTorqueCurrentFOC(0.0);
         motorVelocityControl.UpdateFreqHz = 0.0;
 
            tunables.add("Motor", motor);
+            tunables.add("Velocity Control", motorVelocityControl);
+   }
+   @Override
+   public void periodic(){
+    SmartDashboard.putNumber("Motor Velocity", motorVelocity.get());
+    SmartDashboard.putNumber("Current Velocity", motor.get());
+   SmartDashboard.putBoolean("At Target", motor.getMotionMagicAtTarget().getValue());
    }
 
- private Command runMotor() {
+ public Command spinMotor() {
         return commandBuilder("Intake.runState()")
             .onExecute(() -> {
-               
-                motorVelocityControl.withVelocity(motorVelocity.get());
-                if (Math.abs(motorVelocityControl.Velocity) > 1e-6) {
-                    motor.setControl(motorVelocityControl);
-                } else {
-                    motor.stopMotor();
-                }
+               var maxVelocity = new MotionMagicVelocityVoltage(motorVelocity.get())
+               .withAcceleration(100);
+
+               motor.setControl(maxVelocity);
+
+                // motorVelocityControl.withVelocity(motorVelocity.get());
+                // if (Math.abs(motorVelocityControl.Velocity) > 1e-6) {
+                //     motor.setControl(motorVelocityControl);
+                // } else {
+                //     motor.stopMotor();
+                // }
             })
             .onEnd(() -> {
                 motor.stopMotor();
             });
     }
 
+ public Command moveMotor() {
+        return commandBuilder("Intake.runState()")
+            .onExecute(() -> {
+               var maxVelocity = new MotionMagicVelocityVoltage(motorVelocity.get())
+               .withAcceleration(100);
+
+               motor.setControl(maxVelocity);
+
+                // motorVelocityControl.withVelocity(motorVelocity.get());
+                // if (Math.abs(motorVelocityControl.Velocity) > 1e-6) {
+                //     motor.setControl(motorVelocityControl);
+                // } else {
+                //     motor.stopMotor();
+                // }
+            })
+            .onEnd(() -> {
+                motor.stopMotor();
+            });
+    }
 
      private void configureMotor() {
         final TalonFXConfiguration config = new TalonFXConfiguration();
@@ -64,16 +97,20 @@ public final class KrakenTest extends GRRSubsystem {
 
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
-        config.Slot0.kP = 20.0;
+        config.Slot0.kP = 0.10;
         config.Slot0.kI = 0.0;
         config.Slot0.kD = 0.0;
         config.Slot0.kG = 0.0;
-        config.Slot0.kS = 3.0;
-        config.Slot0.kV = 0.0;
+        config.Slot0.kS = 0.0;
+        config.Slot0.kV = 0.120;
         config.Slot0.kA = 0.0;
 
         config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-
+        config.MotionMagic.MotionMagicCruiseVelocity = 50;
+        config.MotionMagic.MotionMagicAcceleration = 100;
+        config.MotionMagic.MotionMagicJerk = 1000;
+        motor.clearStickyFaults();
+ motor.getConfigurator().apply(config);
         PhoenixUtil.run(() -> motor.clearStickyFaults());
         PhoenixUtil.run(() -> motor.getConfigurator().apply(config));
     }
