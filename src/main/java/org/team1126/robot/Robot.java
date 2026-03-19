@@ -7,6 +7,7 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -18,12 +19,15 @@ import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.MotorSubsystem;
 import org.team1126.robot.util.ReefSelection;
 
+import com.ctre.phoenix6.Orchestra;
+
 @Logged
 public final class Robot extends LoggedRobot {
 
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
 
     public final Lights lights;
+    private final Orchestra orchestra;
     // public final Swerve swerve;
     //
     // public final CookieFinder cookieFinder;
@@ -51,8 +55,10 @@ public final KrakenTest krakenTest;
         // PhoenixUtil.disableDaemons();
 
         // Initialize subsystems
+          orchestra = new Orchestra();
         lights = new Lights();
         krakenTest = new KrakenTest();
+        krakenTest.applyOrchestra(orchestra);
         // swerve = new Swerve();
         // cookieFinder = new CookieFinder();
 
@@ -67,7 +73,9 @@ public final KrakenTest krakenTest;
 
         // Initialize controllers
         driver = new CommandXboxController(Constants.DRIVER);
-        driver.a().whileTrue(krakenTest.runMotor());
+        driver.a().whileTrue(krakenTest.positionMotor());
+        driver.y().whileTrue(krakenTest.zeroMotorPositionCommand());
+        driver.b().onTrue(playMusic("holydriver").ignoringDisable(true));
         // coDriver = new CommandXboxController(Constants.CO_DRIVER);
 
         // Set default commands
@@ -123,7 +131,7 @@ public final KrakenTest krakenTest;
         driver.povRight().whileTrue(lights.sides.gradientChase(Lights.Color.RED));
         driver.y().whileTrue(lights.top.knightRider(Lights.Color.BLUE, Lights.Color.RED));
         driver.rightTrigger().whileTrue(routines.shootingLights());
-        driver.b().whileTrue(routines.selfDriveLights());
+        // driver.b().whileTrue(routines.selfDriveLights());
         // replaced colorCyclingChase binding with alliance fade on X button
         // Original: driver.x().whileTrue(lights.sides.colorCyclingChase(...));
         driver.x().whileTrue(parallel(lights.sides.fadeAllianceSlow(), lights.top.fadeAllianceSlow()));
@@ -164,5 +172,27 @@ public final KrakenTest krakenTest;
         Profiler.run("scheduler", scheduler::run);
         //SmartDashboard.putBoolean("Motor_Stalled", motorSub.isStalled());
         Profiler.run("lights", lights::update);
+    }
+
+
+    public Command playMusic(String song) {
+        return runEnd(
+            () -> {
+                if (!orchestra.isPlaying()) {
+                    sing(song);
+                }
+            },
+            orchestra::stop
+        )
+            .until(DriverStation::isEnabled)
+            .ignoringDisable(true);
+        // orchestra.loadMusic(song);
+        // return run(() -> orchestra.play()).withName("Swerve.playMusic(" + song + ")");
+    }
+
+    public void sing(String song) {
+        orchestra.loadMusic(song + ".chrp");
+        System.out.println("Playing " + song);
+        orchestra.play();
     }
 }
