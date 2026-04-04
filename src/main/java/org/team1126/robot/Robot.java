@@ -35,7 +35,7 @@ public final class Robot extends LoggedRobot {
     // public final MotorSubsystem motorSub;
 
     // public final ReefSelection selection;
-public final KrakenTest krakenTest;
+// public final KrakenTest krakenTest;
     public final Routines routines;
     // public final Autos autos;
 
@@ -57,8 +57,8 @@ public final KrakenTest krakenTest;
         // Initialize subsystems
           orchestra = new Orchestra();
         lights = new Lights();
-        krakenTest = new KrakenTest();
-        krakenTest.applyOrchestra(orchestra);
+        // krakenTest = new KrakenTest();
+        // krakenTest.applyOrchestra(orchestra);
         // swerve = new Swerve();
         // cookieFinder = new CookieFinder();
 
@@ -73,8 +73,8 @@ public final KrakenTest krakenTest;
 
         // Initialize controllers
         driver = new CommandXboxController(Constants.DRIVER);
-        driver.a().whileTrue(krakenTest.positionMotor());
-        driver.y().whileTrue(krakenTest.zeroMotorPositionCommand());
+        // driver.a().whileTrue(krakenTest.positionMotor());
+        // driver.y().whileTrue(krakenTest.zeroMotorPositionCommand());
         driver.b().onTrue(playMusic("holydriver").ignoringDisable(true));
         // coDriver = new CommandXboxController(Constants.CO_DRIVER);
 
@@ -108,7 +108,8 @@ public final KrakenTest krakenTest;
         // routines.lightsSolidRed().schedule();
 
         RobotModeTriggers.autonomous().whileTrue(routines.selfDriveLights());
-        lights.top.setDefaultCommand(lights.top.setSolidRed());
+        lights.topLeft.setDefaultCommand(lights.topLeft.setSolidRed());
+    lights.topRight.setDefaultCommand(lights.topRight.setSolidRed());
         lights.sides.setDefaultCommand(lights.sides.setSolidRed());
         //  lights.sides.setDefaultCommand(lights.sides.levelSelection(selection.isL4()));
 
@@ -127,18 +128,34 @@ public final KrakenTest krakenTest;
 
         driver.povUp().whileTrue(lights.sides.lightningMcQueenChase());
         //driver.povDown().whileTrue(lights.rainbow());
-        driver.povLeft().whileTrue(lights.top.convergeToMiddle(Lights.Color.SHOOTING));
-        driver.povRight().whileTrue(lights.sides.gradientChase(Lights.Color.RED));
-        driver.y().whileTrue(lights.top.knightRider(Lights.Color.BLUE, Lights.Color.RED));
+    driver.povLeft().whileTrue(parallel(
+        lights.topLeft.convergeToMiddle(Lights.Color.SHOOTING),
+        lights.topRight.convergeToMiddle(Lights.Color.SHOOTING)));
+        driver.povRight().whileTrue(lights.sides
+            .gradientChase(Lights.Color.RED));
+    driver.y().whileTrue(parallel(
+        lights.topLeft.knightRider(Lights.Color.BLUE, Lights.Color.RED),
+        lights.topRight.knightRider(Lights.Color.BLUE, Lights.Color.RED),
+        lights.sides.fade(Lights.Color.RED,Lights.Color.BLUE)));
+        
         driver.rightTrigger().whileTrue(routines.shootingLights());
         // driver.b().whileTrue(routines.selfDriveLights());
         // replaced colorCyclingChase binding with alliance fade on X button
         // Original: driver.x().whileTrue(lights.sides.colorCyclingChase(...));
-        driver.x().whileTrue(parallel(lights.sides.fadeAllianceSlow(), lights.top.fadeAllianceSlow()));
+    driver.x().whileTrue(parallel(
+        lights.sides.fadeAllianceSlow(),
+        lights.topLeft.fadeAllianceSlow(),
+        lights.topRight.fadeAllianceSlow()));
 
         // Pair bumpers: left = moving intake (rev=false), right = moving intake (rev=true)
-        driver.leftBumper().whileTrue(parallel(lights.sides.movingIntake(false), lights.top.movingIntake(false)));
-        driver.rightBumper().whileTrue(parallel(lights.sides.movingIntake(true), lights.top.movingIntake(true)));
+    driver.leftBumper().whileTrue(parallel(
+        lights.sides.movingIntake(false),
+        lights.topLeft.movingIntake(false),
+        lights.topRight.movingIntake(false)));
+    driver.rightBumper().whileTrue(parallel(
+        lights.sides.movingIntake(true),
+        lights.topLeft.movingIntake(true),
+        lights.topRight.movingIntake(true)));
         // Enable real-time thread priority
         //enableRT(true);
         //driver.x().whileTrue(Lights.sides.LightningMcQueenChase())

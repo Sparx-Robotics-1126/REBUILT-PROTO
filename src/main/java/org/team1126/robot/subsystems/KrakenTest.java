@@ -29,7 +29,7 @@ public final class KrakenTest extends GRRSubsystem {
    private final VelocityTorqueCurrentFOC motorVelocityControl;
 
    public KrakenTest() {
-        motor = new TalonFX(15, new CANBus("TestCAN")); // or the name your CTRE docs use for the roboRIO bus
+        motor = new TalonFX(15); // or the name your CTRE docs use for the roboRIO bus
      this.motorVelocity = tunables.value("velocity", 0.254);
      this.motorPosition = tunables.value("position", .25);
 
