@@ -780,7 +780,7 @@ public final class Lights {
         }
 
         /**
-         * Fade animation that cycles through: OFF → color1 fades in → color1 fades out → OFF → color2 fades in → color2 fades out → repeat
+         * Fade animation that cycles through: OFF ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ color1 fades in ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ color1 fades out ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ OFF ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ color2 fades in ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ color2 fades out ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ repeat
          * @param color1 The first color to fade in and out.
          * @param color2 The second color to fade in and out.
          */
@@ -801,7 +801,7 @@ public final class Lights {
                         g = 0,
                         b = 0;
 
-                    // Color 1 sequence: OFF → fade in → fade out → OFF
+                    // Color 1 sequence: OFF ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ fade in ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ fade out ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ OFF
                     if (cyclePos < FADE_DURATION) {
                         // Fade color1 in
                         double factor = cyclePos / (double) FADE_DURATION;
@@ -820,7 +820,7 @@ public final class Lights {
                         g = 0;
                         b = 0;
                     }
-                    // Color 2 sequence: OFF → fade in → fade out → OFF
+                    // Color 2 sequence: OFF ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ fade in ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ fade out ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ OFF
                     else if (cyclePos < FADE_DURATION * 3 + OFF_DURATION) {
                         // Fade color2 in
                         double factor = (cyclePos - FADE_DURATION * 2 - OFF_DURATION) / (double) FADE_DURATION;
@@ -955,51 +955,7 @@ public final class Lights {
                 .withName("Lights.Top.setSolidRed()");
         }
 
-        /**
-         * Displays the coral state.
-         */
-        public Command coralDisplay(
-            BooleanSupplier hasCoral,
-            BooleanSupplier goosing,
-            DoubleSupplier goosePosition,
-            ReefSelection selection
-        ) {
-            final double GOOSE_RANGE = 0.15;
-            final double HALF_RANGE = GOOSE_RANGE / 2.0;
-
-            Timer timer = new Timer();
-
-            return sequence(
-                run(() -> set(Color.OFF)).until(hasCoral::getAsBoolean),
-                run(() -> {
-                    if (!goosing.getAsBoolean()) {
-                        set(RobotController.getRSLState() ? Color.HAS_CORAL : Color.OFF);
-                    } else {
-                        double position = goosePosition.getAsDouble();
-                        double percent =
-                            (MathUtil.clamp(Math.abs(position), 0.5 - HALF_RANGE, 0.5 + HALF_RANGE)
-                                - (0.5 - HALF_RANGE))
-                            * (1.0 / GOOSE_RANGE);
-                        if (position < 0.0) percent = 1.0 - percent;
-                        int closestLED = (int) Math.round(percent * (LENGTH - 1));
-                        for (int i = 0; i < LENGTH; i++) {
-                            if (Math.abs(closestLED - i) <= 1) {
-                                set(i, Color.GOOSE);
-                            } else {
-                                set(i, Color.OFF);
-                            }
-                        }
-                    }
-                }).until(() -> !hasCoral.getAsBoolean()),
-                run(() -> set(timer.get() % 0.2 > 0.1 ? Color.SCORED : Color.OFF))
-                    .beforeStarting(timer::restart)
-                    .withTimeout(1.5)
-            )
-                .repeatedly()
-                .ignoringDisable(true)
-                .withName("Lights.Top.coralDisplay()");
-        }
-
+        
         /**
          * Displays the pre-match animation.
          * @param robotPose The robot's current pose.
@@ -1091,22 +1047,7 @@ public final class Lights {
                 .withName("Lights.Top.preMatch()");
         }
 
-        /**
-         * Displays the climbing animation.
-         */
-        public Command climbing(BooleanSupplier isDeployed) {
-            return commandBuilder()
-                .onExecute(() ->
-                    set(
-                        !RobotController.getRSLState() && isDeployed.getAsBoolean()
-                            ? Color.OFF
-                            : (Alliance.isBlue() ? Color.BLUE : Color.RED)
-                    )
-                )
-                .onEnd(() -> set(Color.OFF))
-                .ignoringDisable(true)
-                .withName("Lights.Sides.climbing()");
-        }
+       
 
         /**
          * Turns the lights off.
@@ -1126,7 +1067,7 @@ public final class Lights {
          */
         public Command knightRider(Color baseColor, Color chaseColor) {
             Mutable<Integer> position = new Mutable<>(0);
-            Mutable<Boolean> movingRight = new Mutable<>(true);
+            Mutable<Boolean> movingRight = new Mutable<>(false);
             Mutable<Integer> frameCounter = new Mutable<>(0);
             final int SPEED = 2; // Increase this number to slow down
 
@@ -1351,51 +1292,7 @@ public final class Lights {
                 .withName("Lights.Top.setSolidRed()");
         }
 
-        /**
-         * Displays the coral state.
-         */
-        public Command coralDisplay(
-            BooleanSupplier hasCoral,
-            BooleanSupplier goosing,
-            DoubleSupplier goosePosition,
-            ReefSelection selection
-        ) {
-            final double GOOSE_RANGE = 0.15;
-            final double HALF_RANGE = GOOSE_RANGE / 2.0;
-
-            Timer timer = new Timer();
-
-            return sequence(
-                run(() -> set(Color.OFF)).until(hasCoral::getAsBoolean),
-                run(() -> {
-                    if (!goosing.getAsBoolean()) {
-                        set(RobotController.getRSLState() ? Color.HAS_CORAL : Color.OFF);
-                    } else {
-                        double position = goosePosition.getAsDouble();
-                        double percent =
-                            (MathUtil.clamp(Math.abs(position), 0.5 - HALF_RANGE, 0.5 + HALF_RANGE)
-                                - (0.5 - HALF_RANGE))
-                            * (1.0 / GOOSE_RANGE);
-                        if (position < 0.0) percent = 1.0 - percent;
-                        int closestLED = (int) Math.round(percent * (LENGTH - 1));
-                        for (int i = 0; i < LENGTH; i++) {
-                            if (Math.abs(closestLED - i) <= 1) {
-                                set(i, Color.GOOSE);
-                            } else {
-                                set(i, Color.OFF);
-                            }
-                        }
-                    }
-                }).until(() -> !hasCoral.getAsBoolean()),
-                run(() -> set(timer.get() % 0.2 > 0.1 ? Color.SCORED : Color.OFF))
-                    .beforeStarting(timer::restart)
-                    .withTimeout(1.5)
-            )
-                .repeatedly()
-                .ignoringDisable(true)
-                .withName("Lights.Top.coralDisplay()");
-        }
-
+        
         /**
          * Displays the pre-match animation.
          * @param robotPose The robot's current pose.
@@ -1487,22 +1384,7 @@ public final class Lights {
                 .withName("Lights.Top.preMatch()");
         }
 
-        /**
-         * Displays the climbing animation.
-         */
-        public Command climbing(BooleanSupplier isDeployed) {
-            return commandBuilder()
-                .onExecute(() ->
-                    set(
-                        !RobotController.getRSLState() && isDeployed.getAsBoolean()
-                            ? Color.OFF
-                            : (Alliance.isBlue() ? Color.BLUE : Color.RED)
-                    )
-                )
-                .onEnd(() -> set(Color.OFF))
-                .ignoringDisable(true)
-                .withName("Lights.Sides.climbing()");
-        }
+        
 
         /**
          * Turns the lights off.
@@ -1522,7 +1404,7 @@ public final class Lights {
          */
         public Command knightRider(Color baseColor, Color chaseColor) {
             Mutable<Integer> position = new Mutable<>(0);
-            Mutable<Boolean> movingRight = new Mutable<>(true);
+            Mutable<Boolean> movingRight = new Mutable<>(false);
             Mutable<Integer> frameCounter = new Mutable<>(0);
             final int SPEED = 2; // Increase this number to slow down
 
@@ -1747,50 +1629,7 @@ public final class Lights {
                 .withName("Lights.Top.setSolidRed()");
         }
 
-        /**
-         * Displays the coral state.
-         */
-        public Command coralDisplay(
-            BooleanSupplier hasCoral,
-            BooleanSupplier goosing,
-            DoubleSupplier goosePosition,
-            ReefSelection selection
-        ) {
-            final double GOOSE_RANGE = 0.15;
-            final double HALF_RANGE = GOOSE_RANGE / 2.0;
-
-            Timer timer = new Timer();
-
-            return sequence(
-                run(() -> set(Color.OFF)).until(hasCoral::getAsBoolean),
-                run(() -> {
-                    if (!goosing.getAsBoolean()) {
-                        set(RobotController.getRSLState() ? Color.HAS_CORAL : Color.OFF);
-                    } else {
-                        double position = goosePosition.getAsDouble();
-                        double percent =
-                            (MathUtil.clamp(Math.abs(position), 0.5 - HALF_RANGE, 0.5 + HALF_RANGE)
-                                - (0.5 - HALF_RANGE))
-                            * (1.0 / GOOSE_RANGE);
-                        if (position < 0.0) percent = 1.0 - percent;
-                        int closestLED = (int) Math.round(percent * (LENGTH - 1));
-                        for (int i = 0; i < LENGTH; i++) {
-                            if (Math.abs(closestLED - i) <= 1) {
-                                set(i, Color.GOOSE);
-                            } else {
-                                set(i, Color.OFF);
-                            }
-                        }
-                    }
-                }).until(() -> !hasCoral.getAsBoolean()),
-                run(() -> set(timer.get() % 0.2 > 0.1 ? Color.SCORED : Color.OFF))
-                    .beforeStarting(timer::restart)
-                    .withTimeout(1.5)
-            )
-                .repeatedly()
-                .ignoringDisable(true)
-                .withName("Lights.Top.coralDisplay()");
-        }
+      
 
         /**
          * Displays the pre-match animation.
@@ -1883,22 +1722,6 @@ public final class Lights {
                 .withName("Lights.Top.preMatch()");
         }
 
-        /**
-         * Displays the climbing animation.
-         */
-        public Command climbing(BooleanSupplier isDeployed) {
-            return commandBuilder()
-                .onExecute(() ->
-                    set(
-                        !RobotController.getRSLState() && isDeployed.getAsBoolean()
-                            ? Color.OFF
-                            : (Alliance.isBlue() ? Color.BLUE : Color.RED)
-                    )
-                )
-                .onEnd(() -> set(Color.OFF))
-                .ignoringDisable(true)
-                .withName("Lights.Sides.climbing()");
-        }
 
         /**
          * Turns the lights off.
@@ -1918,7 +1741,7 @@ public final class Lights {
          */
         public Command knightRider(Color baseColor, Color chaseColor) {
             Mutable<Integer> position = new Mutable<>(0);
-            Mutable<Boolean> movingRight = new Mutable<>(true);
+            Mutable<Boolean> movingRight = new Mutable<>(false);
             Mutable<Integer> frameCounter = new Mutable<>(0);
             final int SPEED = 2; // Increase this number to slow down
 
@@ -2279,22 +2102,6 @@ public final class Lights {
                 .withName("Lights.Top.preMatch()");
         }
 
-        /**
-         * Displays the climbing animation.
-         */
-        public Command climbing(BooleanSupplier isDeployed) {
-            return commandBuilder()
-                .onExecute(() ->
-                    set(
-                        !RobotController.getRSLState() && isDeployed.getAsBoolean()
-                            ? Color.OFF
-                            : (Alliance.isBlue() ? Color.BLUE : Color.RED)
-                    )
-                )
-                .onEnd(() -> set(Color.OFF))
-                .ignoringDisable(true)
-                .withName("Lights.Sides.climbing()");
-        }
 
         /**
          * Turns the lights off.
@@ -2314,14 +2121,14 @@ public final class Lights {
          */
         public Command knightRider(Color baseColor, Color chaseColor) {
             Mutable<Integer> position = new Mutable<>(0);
-            Mutable<Boolean> movingRight = new Mutable<>(true);
+            Mutable<Boolean> movingRight = new Mutable<>(false);
             Mutable<Integer> frameCounter = new Mutable<>(0);
             final int SPEED = 2; // Increase this number to slow down
 
             return commandBuilder()
                 .onInitialize(() -> {
                     position.value = 0;
-                    movingRight.value = true;
+                    movingRight.value = false;
                     frameCounter.value = 0;
                 })
                 .onExecute(() -> {
