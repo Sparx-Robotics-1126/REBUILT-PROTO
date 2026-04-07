@@ -108,8 +108,8 @@ public final class Robot extends LoggedRobot {
         // routines.lightsSolidRed().schedule();
 
         RobotModeTriggers.autonomous().whileTrue(routines.selfDriveLights());
-        lights.topLeft.setDefaultCommand(lights.topLeft.setSolidRed());
-    lights.topRight.setDefaultCommand(lights.topRight.setSolidRed());
+        lights.topLeftBottom.setDefaultCommand(lights.topLeftBottom.setSolidRed());
+        lights.topRightBottom.setDefaultCommand(lights.topRightBottom.setSolidRed());
         lights.sides.setDefaultCommand(lights.sides.setSolidRed());
         //  lights.sides.setDefaultCommand(lights.sides.levelSelection(selection.isL4()));
 
@@ -129,13 +129,13 @@ public final class Robot extends LoggedRobot {
         driver.povUp().whileTrue(lights.sides.lightningMcQueenChase());
         //driver.povDown().whileTrue(lights.rainbow());
     driver.povLeft().whileTrue(parallel(
-        lights.topLeft.convergeToMiddle(Lights.Color.SHOOTING),
-        lights.topRight.convergeToMiddle(Lights.Color.SHOOTING)));
+        lights.topLeftBottom.convergeToMiddle(Lights.Color.SHOOTING),
+        lights.topRightBottom.convergeToMiddle(Lights.Color.SHOOTING)));
         driver.povRight().whileTrue(lights.sides
             .gradientChase(Lights.Color.RED));
     driver.y().whileTrue(parallel(
-        lights.topLeft.knightRider(Lights.Color.BLUE, Lights.Color.RED),
-        lights.topRight.knightRider(Lights.Color.BLUE, Lights.Color.RED),
+        lights.topLeftBottom.knightRider(Lights.Color.BLUE, Lights.Color.RED),
+        lights.topRightBottom.knightRider(Lights.Color.BLUE, Lights.Color.RED),
         lights.sides.fade(Lights.Color.RED,Lights.Color.BLUE)));
         
         driver.rightTrigger().whileTrue(routines.shootingLights());
@@ -144,18 +144,18 @@ public final class Robot extends LoggedRobot {
         // Original: driver.x().whileTrue(lights.sides.colorCyclingChase(...));
     driver.x().whileTrue(parallel(
         lights.sides.fadeAllianceSlow(),
-        lights.topLeft.fadeAllianceSlow(),
-        lights.topRight.fadeAllianceSlow()));
+        lights.topLeftBottom.fadeAllianceSlow(),
+        lights.topRightBottom.fadeAllianceSlow()));
 
         // Pair bumpers: left = moving intake (rev=false), right = moving intake (rev=true)
     driver.leftBumper().whileTrue(parallel(
         lights.sides.movingIntake(false),
-        lights.topLeft.movingIntake(false),
-        lights.topRight.movingIntake(false)));
+        lights.topLeftBottom.movingIntake(false),
+        lights.topRightBottom.movingIntake(false)));
     driver.rightBumper().whileTrue(parallel(
         lights.sides.movingIntake(true),
-        lights.topLeft.movingIntake(true),
-        lights.topRight.movingIntake(true)));
+        lights.topLeftBottom.movingIntake(true),
+        lights.topRightBottom.movingIntake(true)));
         // Enable real-time thread priority
         //enableRT(true);
         //driver.x().whileTrue(Lights.sides.LightningMcQueenChase())

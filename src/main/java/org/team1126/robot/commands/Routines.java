@@ -31,23 +31,23 @@ public final class Routines {
     }
 
     public Command lightsSolidRed() {
-        return lights.topLeft.setSolidRed().withName("Routines.lightsSolidRed()");
+        return lights.topLeftBottom.setSolidRed().withName("Routines.lightsSolidRed()");
         // return lights.top.setSolidRed();
     }
 
     public Command shootingLights() {
         return parallel(
             lights.sides.chase(Lights.Color.SHOOTING),
-            lights.topLeft.convergeToMiddle(Lights.Color.SHOOTING),
-            lights.topRight.convergeToMiddle(Lights.Color.SHOOTING)
+            lights.topLeftBottom.convergeToMiddle(Lights.Color.SHOOTING),
+            lights.topRightBottom.convergeToMiddle(Lights.Color.SHOOTING)
         ).withName("Routines.shootingLights()");
     }
 
     public Command selfDriveLights() {
         return parallel(
             lights.sides.fade(Lights.Color.BLUE, Lights.Color.RED),
-            lights.topLeft.knightRider(Lights.Color.BLUE, Lights.Color.RED),
-            lights.topRight.knightRider(Lights.Color.BLUE, Lights.Color.RED)
+            lights.topLeftBottom.knightRider(Lights.Color.BLUE, Lights.Color.RED),
+            lights.topRightBottom.knightRider(Lights.Color.BLUE, Lights.Color.RED)
         ).withName("Routines.selfDriveLights()");
     }
     /**
