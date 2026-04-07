@@ -109,7 +109,9 @@ public final class Robot extends LoggedRobot {
 
         RobotModeTriggers.autonomous().whileTrue(routines.selfDriveLights());
         lights.topLeftBottom.setDefaultCommand(lights.topLeftBottom.setSolidRed());
+        lights.topLeftTop.setDefaultCommand(lights.topLeftTop.setSolidRed());
         lights.topRightBottom.setDefaultCommand(lights.topRightBottom.setSolidRed());
+        lights.topRightTop.setDefaultCommand(lights.topRightTop.setSolidRed());
         lights.sides.setDefaultCommand(lights.sides.setSolidRed());
         //  lights.sides.setDefaultCommand(lights.sides.levelSelection(selection.isL4()));
 
@@ -129,12 +131,16 @@ public final class Robot extends LoggedRobot {
         driver.povUp().whileTrue(lights.sides.lightningMcQueenChase());
         //driver.povDown().whileTrue(lights.rainbow());
     driver.povLeft().whileTrue(parallel(
+        lights.topLeftTop.convergeToMiddle(Lights.Color.SHOOTING),
         lights.topLeftBottom.convergeToMiddle(Lights.Color.SHOOTING),
+        lights.topRightTop.convergeToMiddle(Lights.Color.SHOOTING),
         lights.topRightBottom.convergeToMiddle(Lights.Color.SHOOTING)));
         driver.povRight().whileTrue(lights.sides
             .gradientChase(Lights.Color.RED));
     driver.y().whileTrue(parallel(
+        lights.topLeftTop.knightRider(Lights.Color.BLUE, Lights.Color.RED),
         lights.topLeftBottom.knightRider(Lights.Color.BLUE, Lights.Color.RED),
+        lights.topRightTop.knightRider(Lights.Color.BLUE, Lights.Color.RED),
         lights.topRightBottom.knightRider(Lights.Color.BLUE, Lights.Color.RED),
         lights.sides.fade(Lights.Color.RED,Lights.Color.BLUE)));
         
@@ -150,11 +156,15 @@ public final class Robot extends LoggedRobot {
         // Pair bumpers: left = moving intake (rev=false), right = moving intake (rev=true)
     driver.leftBumper().whileTrue(parallel(
         lights.sides.movingIntake(false),
+        lights.topLeftTop.movingIntake(true),
         lights.topLeftBottom.movingIntake(false),
+        lights.topRightTop.movingIntake(true),
         lights.topRightBottom.movingIntake(false)));
     driver.rightBumper().whileTrue(parallel(
         lights.sides.movingIntake(true),
+        lights.topLeftTop.movingIntake(false),
         lights.topLeftBottom.movingIntake(true),
+        lights.topRightTop.movingIntake(false),
         lights.topRightBottom.movingIntake(true)));
         // Enable real-time thread priority
         //enableRT(true);

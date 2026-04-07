@@ -34,7 +34,7 @@ import org.team1126.robot.util.ReefSelection;
 public final class Lights {
 
     private static final int LENGTH = 21;
-    private static final int COUNT = 4;
+    private static final int COUNT = 6;
 
     // Segment base indices in the AddressableLEDBuffer (depends on physical daisy-chain order)
     // 0: Side Left, 1: Top Left, 2: Top Right, 3: Side Right
@@ -1289,7 +1289,7 @@ public final class Lights {
                 .onInitialize(() -> set(Color.RED))
                 .onEnd(() -> set(Color.OFF))
                 .ignoringDisable(true)
-                .withName("Lights.Top.setSolidRed()");
+                .withName("Lights.Top.Left.Top.setSolidRed()");
         }
 
         
@@ -1453,7 +1453,7 @@ public final class Lights {
                 })
                 .onEnd(() -> set(Color.OFF))
                 .ignoringDisable(true)
-                .withName("Lights.Top.knightRider()");
+                .withName("Lights.Top.Left.Top.knightRider()");
         }
 
         /**
@@ -1626,7 +1626,7 @@ public final class Lights {
                 .onInitialize(() -> set(Color.RED))
                 .onEnd(() -> set(Color.OFF))
                 .ignoringDisable(true)
-                .withName("Lights.Top.setSolidRed()");
+                .withName("Lights.Top.Right.Bottom.setSolidRed()");
         }
 
       
@@ -1963,54 +1963,10 @@ public final class Lights {
                 .onInitialize(() -> set(Color.RED))
                 .onEnd(() -> set(Color.OFF))
                 .ignoringDisable(true)
-                .withName("Lights.Top.setSolidRed()");
+                .withName("Lights.Top.Right.Top.setSolidRed()");
         }
 
-        /**
-         * Displays the coral state.
-         */
-        public Command coralDisplay(
-            BooleanSupplier hasCoral,
-            BooleanSupplier goosing,
-            DoubleSupplier goosePosition,
-            ReefSelection selection
-        ) {
-            final double GOOSE_RANGE = 0.15;
-            final double HALF_RANGE = GOOSE_RANGE / 2.0;
-
-            Timer timer = new Timer();
-
-            return sequence(
-                run(() -> set(Color.OFF)).until(hasCoral::getAsBoolean),
-                run(() -> {
-                    if (!goosing.getAsBoolean()) {
-                        set(RobotController.getRSLState() ? Color.HAS_CORAL : Color.OFF);
-                    } else {
-                        double position = goosePosition.getAsDouble();
-                        double percent =
-                            (MathUtil.clamp(Math.abs(position), 0.5 - HALF_RANGE, 0.5 + HALF_RANGE)
-                                - (0.5 - HALF_RANGE))
-                            * (1.0 / GOOSE_RANGE);
-                        if (position < 0.0) percent = 1.0 - percent;
-                        int closestLED = (int) Math.round(percent * (LENGTH - 1));
-                        for (int i = 0; i < LENGTH; i++) {
-                            if (Math.abs(closestLED - i) <= 1) {
-                                set(i, Color.GOOSE);
-                            } else {
-                                set(i, Color.OFF);
-                            }
-                        }
-                    }
-                }).until(() -> !hasCoral.getAsBoolean()),
-                run(() -> set(timer.get() % 0.2 > 0.1 ? Color.SCORED : Color.OFF))
-                    .beforeStarting(timer::restart)
-                    .withTimeout(1.5)
-            )
-                .repeatedly()
-                .ignoringDisable(true)
-                .withName("Lights.Top.coralDisplay()");
-        }
-
+        
         /**
          * Displays the pre-match animation.
          * @param robotPose The robot's current pose.
